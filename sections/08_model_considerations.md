@@ -84,11 +84,7 @@ Generate with logging enabled. Check:
 
 **Step 2: Adjust decay**
 
-For peaked distributions, lower decay (0.7–0.85) helps prevent fishtailing from forced high-probability selections.
-
-<!-- TODO: 
-  @loxifi: Define what fishtailing is, somewhere in the docs, so that the user knows what it is.
--->
+For peaked distributions, lower decay (0.7–0.85) helps prevent fishtailing—where the calculated target swings wildly between extremes after forced high-probability selections.
 
 > [!CAUTION]
 > **Don't chase the cluster with target.** If candidates cluster at 0.8, setting target to 0.8 defeats Adaptive-P's purpose—you're just accepting what the model already wants to output. Instead, keep target at your desired creativity level and let the sampler work with available options.
