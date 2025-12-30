@@ -164,7 +164,7 @@ Real token distributions after min-p rarely resemble smooth curves. They typical
 - 2-3 mid-range candidates + low cluster with gap (competitive choice with tail)
 - Many low-probability tokens with no clear leader (creative opportunity)
 
-Adaptive-P's transformation handles each case appropriately. The unbounded negative logits prevent clustered low tokens from accumulating probability (the Gaussian/XTC failure mode). The quadratic core provides fine differentiation among close competitors.
+Adaptive-P's transformation handles each case appropriately. The unbounded negative logits prevent clustered low tokens from accumulating probability (the XTC failure mode). The quadratic core provides fine differentiation among close competitors.
 
 > **Graph [G-5]: Selective Redistribution on Real Distribution**  
 > *Use the "prestigious" sample (22 tokens: one at 0.30, rest at 0.02-0.10). Show how the exponential dropoff prevents clustered low tokens from accumulating probability. Contrast with what uniform redistribution would produce.*

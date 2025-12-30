@@ -129,11 +129,9 @@ The `dist² / (1 + dist)` function has critical properties:
 > **Graph [G-10]: Transformation Function Shape**  
 > *Plot the function PEAK - SHARPNESS × dist² / (1 + dist) showing the quadratic core transitioning to linear tails. Annotate the key regions.*
 
-**Contrast with Gaussian:**
+**Why not a floor-based transformation?**
 
-A Gaussian transformation (e.g., `exp(-dist²)`) approaches zero asymptotically but never goes negative. All distant tokens converge toward the same floor, enabling the cluster accumulation problem.
-
-The samples.log includes both Adaptive-P and Gaussian outputs for comparison. On clustered distributions, Gaussian preserves significantly more tail probability.
+A transformation with a minimum logit floor (e.g., one that asymptotically approaches zero) would cause all distant tokens to converge toward the same value, enabling the cluster accumulation problem described next.
 
 ## 3.5 Why Unbounded Negative Logits Matter
 
@@ -141,7 +139,7 @@ This section addresses the clustering problem in detail, as it's the key insight
 
 **The setup:** Consider the "." token selection from samples.log—26 candidates ranging from 0.01 to 0.11 probability, none close to target 0.5.
 
-**With a logit floor (Gaussian-style):**
+**With a logit floor (bounded transformation):**
 - All 26 tokens are far from target
 - All receive approximately the minimum logit (let's say 0.0)
 - After softmax: each gets exp(0) = 1.0 relative weight
@@ -156,13 +154,13 @@ This section addresses the clustering problem in detail, as it's the key insight
 - Distant tokens contribute essentially zero probability
 
 The practical difference:
-- Gaussian: 26 tokens share probability approximately evenly
+- Floor-based: 26 tokens share probability approximately evenly
 - Adaptive-P: Top 2-3 tokens dominate; rest are effectively excluded
 
 This is the "selective redistribution" property. Probability doesn't flow uniformly to all candidates—it concentrates on those closest to target.
 
 > **Graph [G-11]: Cluster Pile-up Comparison**  
-> *The "." token case (26 candidates). Show post-softmax probabilities for Gaussian (floor-based) vs. Adaptive-P (unbounded). The samples.log data provides both outputs directly.*
+> *The "." token case (26 candidates). Show post-softmax probabilities for floor-based vs. unbounded transformation.*
 
 ## 3.6 Softmax Normalization
 

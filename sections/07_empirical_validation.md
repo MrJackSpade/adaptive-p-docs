@@ -70,33 +70,7 @@ Adaptive-P produces a curved selection rate that peaks near target. Mid-range to
 > **Graph [G-19]: Adaptive-P vs. Temperature Distribution**  
 > *Selection rate curves for both methods on same input data. Show that temperature is flat while Adaptive-P peaks.*
 
-### 6.3.2 Adaptive-P vs. Gaussian Transform
 
-The samples.log includes both Adaptive-P and Gaussian outputs for direct comparison.
-
-**Key observations:**
-
-| Distribution Type | Adaptive-P | Gaussian |
-|------------------|-----------|----------|
-| Binary (2 tokens) | Similar behavior | Similar behavior |
-| Clustered (20+ tail) | Suppresses tail aggressively | Preserves more tail mass |
-| Spread (5-10 mid-range) | Fine differentiation | Fine differentiation |
-
-The difference is most pronounced on clustered distributions—the failure mode that motivated the unbounded-negative design.
-
-**Example from samples.log ("." token, 26 candidates):**
-
-| Token | Input P | Adaptive-P P | Gaussian P |
-|-------|---------|-------------|------------|
-| 41328 | 0.110 | 0.183 | 0.043 |
-| 42331 | 0.094 | 0.118 | 0.038 |
-| 4598 | 0.081 | 0.082 | 0.034 |
-| ... (23 more) | 0.01-0.06 | 0.01-0.04 each | 0.02-0.03 each |
-
-Adaptive-P concentrates probability on the top candidates. Gaussian spreads it more evenly, including to the tail cluster.
-
-> **Graph [G-20]: Adaptive-P vs. Gaussian on Clustered Input**  
-> *Bar chart or distribution comparison for the "." token case, directly from samples.log data.*
 
 ## 6.4 Adaptation Dynamics
 
