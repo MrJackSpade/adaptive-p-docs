@@ -21,10 +21,9 @@ Selection frequency should peak near the target probability. Tokens at input pro
 > **Graph [G-17]: Selection Scatter Plot**  
 > *25k+ tokens: plot input probability (x-axis) vs. selection frequency or selection rate (y-axis). Show clear clustering around target 0.5.*
 
-<!--
-AUTHOR NOTE: The "Available Probabilities" scatter plot you provided (Image 3) 
-shows this pattern: green (selected) points clustering in different regions 
-than orange (candidates). This or a similar visualization would work well here.
+<!-- TODO: G-17 may already exist
+  @claude: Image 3 (scatter) shows this pattern. May be usable directly.
+  @loxifi: 
 -->
 
 **Interpreting the scatter:**
@@ -49,9 +48,9 @@ After initial warmup (if any), the rolling average should stabilize near the con
 > **Graph [G-18]: Rolling Average Convergence**  
 > *Plot rolling average of selected probabilities vs. token index. Overlay configured target as reference line. Show convergence.*
 
-<!--
-AUTHOR NOTE: This could be derived from the scatter data or generated separately. 
-Window size for rolling average should be documented (e.g., 50-token window).
+<!-- TODO: G-18 rolling average details
+  @claude: Derive from scatter data. Document window size (e.g., 50-token).
+  @loxifi: 
 -->
 
 ## 6.3 Contrast with Baseline Methods
@@ -115,10 +114,9 @@ Track calculated target over generation. Observe response to selection patterns.
 > **Graph [G-21]: Target Adaptation Response**  
 > *Calculated target (line) overlaid with selected probability (scatter). Show negative correlation: high selection → target drops.*
 
-<!--
-AUTHOR NOTE: The "Target vs Selected Token Probability" graph you provided 
-(Image 2) shows this pattern. Green (selected) bounces while orange (target) 
-stays relatively stable with compensating drift.
+<!-- TODO: G-21 may already exist
+  @claude: Image 2 shows this pattern. Green bounces, orange stable.
+  @loxifi: 
 -->
 
 ## 6.5 Initialization Validation
@@ -135,9 +133,9 @@ We verify that correct initialization prevents the warmup artifacts shown with n
 > **Graph [G-22]: Initialization Comparison**  
 > *Two panels: bad initialization (calculated target recovery curve) vs. correct initialization (flat from start).*
 
-<!--
-AUTHOR NOTE: Image 0 you provided shows the bad case clearly (recovery over 
-~80 tokens). Generate the correct case for comparison.
+<!-- TODO: G-22 needs correct init version
+  @claude: Image 0 shows bad case. Need correct init version for comparison.
+  @loxifi: 
 -->
 
 ## 6.6 Cross-Model Consistency
@@ -158,7 +156,7 @@ All models show peaked selection rate near 0.5. The peak height may vary (models
 > **Graph [G-23]: Cross-Model Selection Patterns**  
 > *Overlay selection rate curves from different models at same target. Show peak locations align.*
 
-<!--
-AUTHOR NOTE: This requires generation runs on multiple models. 
-May be lower priority than single-model validation graphs.
+<!-- TODO: G-23 cross-model data
+  @claude: Requires multi-model runs. Lower priority.
+  @loxifi: 
 -->

@@ -137,9 +137,9 @@ llama_sampler_chain_add(chain,
     -p "Once upon a time"
 ```
 
-<!--
-AUTHOR NOTE: The actual CLI parameter names will depend on the llama.cpp PR. 
-Verify these match the merged implementation.
+<!-- TODO: Verify CLI parameter names
+  @claude: Names depend on llama.cpp PR. Verify match.
+  @loxifi: 
 -->
 
 ## 5.6 Integration Challenges

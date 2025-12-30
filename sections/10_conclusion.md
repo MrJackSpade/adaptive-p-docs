@@ -57,12 +57,7 @@ Adaptive-P is implemented in llama.cpp and available via PR to the main reposito
 
 ---
 
-<!--
-AUTHOR NOTE: Final sections to consider adding:
-- Acknowledgments (loxifi, geechan, mfunlimited as key contributors)
-- References (Mirostat paper, original top-p paper, etc.)
-- Appendix with additional experimental results
-
-Also consider whether the paper needs a "Related Work" references section 
-with proper academic citations for temperature, top-k, top-p, Mirostat, etc.
+<!-- TODO: Final sections to add
+  @claude: Acknowledgments (loxifi, geechan, mfunlimited), References (Mirostat paper, top-p paper, etc.), Appendix.
+  @loxifi: 
 -->

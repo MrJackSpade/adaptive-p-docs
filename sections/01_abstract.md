@@ -12,8 +12,7 @@ Key contributions include:
 
 Empirical evaluation across multiple models demonstrates that Adaptive-P successfully targets user-specified probability ranges while maintaining output coherence. The same target parameter produces consistent behavior across different model architectures, making it a practical tool for controlling the creativity-coherence tradeoff in text generation.
 
-<!-- 
-AUTHOR NOTE: This abstract may be too long for arxiv standards (typically 150-250 words). 
-Consider trimming after full paper is drafted and we know what's essential.
-Current word count: ~250 words.
+<!-- TODO: Abstract length (~250 words, arxiv typically wants 150-250)
+  @claude: May need trimming after full paper is drafted.
+  @loxifi: 
 -->

@@ -32,10 +32,9 @@ Users report that the target parameter feels intuitive once understood. "I want 
 > **Graph [G-14]: Target Effect on Selection Distribution**  
 > *Aggregate selection histograms from large generation runs at target 0.3, 0.5, 0.7, 0.9. Show how the selection peak shifts.*
 
-<!--
-AUTHOR NOTE: The "Selection Rate Over Available" graph (Image 1) you provided 
-shows this at target=0.5 with varying decay. Generate variants at different 
-target values for this comparison.
+<!-- TODO: G-14 needs different target values
+  @claude: Image 1 shows target=0.5 with varying decay. Need target variants.
+  @loxifi: 
 -->
 
 ## 4.2 Decay
@@ -68,9 +67,9 @@ Higher decay produces sharper selection curves. With decay 0.99, the sampler tig
 > **Graph [G-15]: Decay Effect Comparison**  
 > *Selection rate curves at decay 0.5, 0.7, 0.8, 0.9 with fixed target 0.5. Show how curve sharpness varies.*
 
-<!--
-AUTHOR NOTE: Image 1 you provided shows exactly this comparison. 
-May be usable directly or as reference for similar visualization.
+<!-- TODO: G-15 may already exist
+  @claude: Image 1 shows exactly this comparison. May be usable directly.
+  @loxifi: 
 -->
 
 **Interaction with target:**
@@ -112,11 +111,9 @@ Scales the distance calculation. Effectively defines "nearby" in probability spa
 
 The inverse (INV_WIDTH = 5.0) appears in the transformation to avoid runtime division.
 
-<!--
-AUTHOR NOTE: There was discussion in the chats about whether SHARPNESS should 
-be user-configurable. The decision was to keep it fixed for simplicity—most 
-users shouldn't need to adjust it, and exposing it adds complexity. 
-May be worth mentioning this design decision.
+<!-- TODO: Mention SHARPNESS design decision?
+  @claude: Chat logs discussed user-configurable SHARPNESS. Decided against for simplicity.
+  @loxifi: 
 -->
 
 ## 4.4 Disabling Adaptive-P

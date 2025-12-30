@@ -18,10 +18,9 @@ Adaptive-P addresses this by applying a bell-curve transformation centered on th
 > **Graph [G-7]: Illustrative Bell Curve**  
 > *Show the logit transformation curve centered at targets 0.3, 0.5, and 0.7. Label clearly as "illustrative of transformation function only" since real distributions are sparse and don't form continuous curves.*
 
-<!--
-AUTHOR NOTE: This illustrative graph is important for conceptual understanding, 
-but must be clearly labeled as theoretical. The shapes shown won't match real 
-token distributions which are sparse and clustered.
+<!-- TODO: G-7 must be labeled as illustrative
+  @claude: Real distributions are sparse/clustered, won't match smooth curve.
+  @loxifi: 
 -->
 
 ## 3.2 Real Distribution Behavior
@@ -90,10 +89,9 @@ calculated_target = 2.0 × configured_target − weighted_average
 > **Graph [G-9]: Calculated Target Drift**  
 > *Time-series from samples.log showing calculated target fluctuation over 20+ tokens. Overlay the configured target as a flat reference line.*
 
-<!--
-AUTHOR NOTE: The target values graph you provided (Image 0) shows this well, 
-but that one had bad initialization. We may want a clean version showing 
-normal operation.
+<!-- TODO: G-9 needs clean version
+  @claude: Image 0 shows bad init. Need normal operation version.
+  @loxifi: 
 -->
 
 The calculated target is clamped to [0.0, 1.0] before use. Extreme historical selections can push the raw calculated value outside this range, but the clamping ensures the transformation remains well-defined.
@@ -225,8 +223,7 @@ This primes the history as if infinitely many tokens at the target probability h
 > **Graph [G-13]: Initialization Effect**  
 > *Compare first 50 tokens with bad initialization (target starts at 0, slowly recovers) vs. correct initialization (stable from start). The target values graph you provided shows the bad case clearly.*
 
-<!--
-AUTHOR NOTE: Image 0 you provided shows bad initialization (decay=0.99, 
-calculated target goes negative then recovers over ~80 tokens). 
-Generate a companion showing correct initialization for contrast.
+<!-- TODO: G-13 needs correct initialization version
+  @claude: Image 0 shows bad case (recovery over 80 tokens). Need correct init version.
+  @loxifi: 
 -->

@@ -96,8 +96,7 @@ If outputs seem stuck in patterns, lower decay (0.8).
 
 Most users find target adjustment sufficient; decay rarely needs changing.
 
-<!--
-AUTHOR NOTE: Consider adding specific examples from testing with different 
-models. The chat logs mention Gemma and Phi specifically as showing less 
-dramatic effects. Could include concrete observations.
+<!-- TODO: Add concrete model-specific examples
+  @claude: Chat logs mention Gemma/Phi showing less dramatic effects.
+  @loxifi: 
 -->

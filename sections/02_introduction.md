@@ -24,10 +24,9 @@ Current sampling methods fall into two broad categories, neither of which solves
 
 Neither approach asks the question we actually want to answer: "Can we preferentially select tokens at a specific probability level?"
 
-<!-- 
-AUTHOR NOTE: Consider adding a concrete example here showing what temperature 
-and truncation do to a real distribution. Reference to G-2 (temperature effect) 
-could be embedded here.
+<!-- TODO: Add concrete example of temperature/truncation effect
+  @claude: Could reference G-2 here or embed a small table.
+  @loxifi: 
 -->
 
 ## 1.3 The Adaptive-P Solution
@@ -51,8 +50,7 @@ The following sections detail the algorithm's mathematical foundation, its relat
 > **Graph [G-1]: Overview Comparison**  
 > *Placeholder for visualization showing input vs. output probability distributions for Temperature, Min-P, XTC, and Adaptive-P applied to the same real token distribution.*
 
-<!--
-AUTHOR NOTE: G-1 should use real data from samples.log or similar. 
-Consider the "prestigious" example (22 tokens) as a good test case showing 
-how each method handles a mid-range leader with clustered tail.
+<!-- TODO: Data source for G-1
+  @claude: Suggest "prestigious" example (22 tokens) - mid-range leader + clustered tail.
+  @loxifi: 
 -->

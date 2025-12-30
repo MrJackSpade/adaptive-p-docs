@@ -24,9 +24,9 @@ The effect is also highly dependent on the input distribution's shape. Applying 
 > **Graph [G-2]: Temperature Effect on Real Distribution**  
 > *Show a real multi-token distribution (e.g., the 18-token "serene" case from samples.log) with pre/post-softmax probabilities at T=0.5, T=1.0, T=1.5. Demonstrate that temperature shifts everything uniformly rather than targeting a range.*
 
-<!--
-AUTHOR NOTE: The "a serene" example has 18 tokens with nice spread. 
-Consider generating temperature variants of this specific case for G-2.
+<!-- TODO: G-2 data source
+  @claude: Suggest "serene" example (18 tokens) with nice spread.
+  @loxifi: 
 -->
 
 ## 2.2 Top-K Sampling
@@ -83,9 +83,9 @@ The samples in this paper show tokens already filtered to p > 0.01—that's min-
 > **Graph [G-3]: Min-P as Guardrail**  
 > *Show a full vocabulary distribution (with garbage tail) before min-p, then the cleaned distribution after min-p, then the Adaptive-P transform result. Demonstrate the pipeline.*
 
-<!--
-AUTHOR NOTE: We may need to generate pre-min-p data to show the full garbage tail. 
-Current samples.log already has min-p applied.
+<!-- TODO: Pre-min-p data needed for G-3
+  @claude: Current samples.log already has min-p applied. Need pre-filtered data.
+  @loxifi: 
 -->
 
 ## 2.5 XTC (eXclude Top Choices)
@@ -114,10 +114,9 @@ The RNG dependence also means that the same prompt with the same settings can pr
 > **Graph [G-4]: XTC Redistribution Failure**  
 > *Demonstrate uniform redistribution spreading probability to low-quality tail tokens. Show the fat tail problem. Compare to Adaptive-P's selective redistribution which doesn't have this issue.*
 
-<!--
-AUTHOR NOTE: This may require simulated data showing pre/post XTC distribution 
-with fat tail visible. Alternatively, could show theoretical calculation of 
-how much mass ends up in tail for typical distributions.
+<!-- TODO: G-4 data (XTC fat tail)
+  @claude: May need simulated data or theoretical calculation.
+  @loxifi: 
 -->
 
 ## 2.6 Mirostat
@@ -139,10 +138,9 @@ The samples in this paper illustrate this reality: most token selections have on
 
 Adaptive-P addresses this by operating on probabilities directly, not on rank. It can boost a 0.1 probability token's chances relative to a 0.8 probability token, which Top-K adjustment cannot accomplish.
 
-<!--
-AUTHOR NOTE: Could reference the chat log discussion where geechan and loxifi 
-discuss why Mirostat failed and led to the Adaptive-P approach. 
-Key quote from showcase log around line 200-400 area.
+<!-- TODO: Add Mirostat discussion quote from chat logs
+  @claude: Key discussion around showcase log lines 200-400.
+  @loxifi: 
 -->
 
 ## 2.7 Why Adaptive-P is Different: Selective Redistribution
@@ -174,7 +172,7 @@ Adaptive-P's transformation handles each case appropriately. The unbounded negat
 > **Graph [G-6]: Selective vs. Uniform Redistribution Comparison**  
 > *Side-by-side: XTC-style uniform redistribution showing fat tail vs. Adaptive-P selective redistribution showing focused distribution around target.*
 
-<!--
-AUTHOR NOTE: G-5 and G-6 may be combinable into a single visualization with 
-two panels. Consider whether separate graphs or combined is clearer.
+<!-- TODO: Combine G-5 and G-6?
+  @claude: Could be single visualization with two panels.
+  @loxifi: 
 -->

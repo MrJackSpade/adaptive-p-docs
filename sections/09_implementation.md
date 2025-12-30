@@ -252,7 +252,7 @@ def softmax(x):
 | Hugging Face | `LogitsProcessor` subclass |
 | exllamav2 | Sampler settings |
 
-<!--
-AUTHOR NOTE: The Python implementation above is untested pseudocode. 
-May want to verify correctness before publishing.
+<!-- TODO: Python implementation untested
+  @claude: Verify correctness before publishing.
+  @loxifi: 
 -->
