@@ -26,7 +26,7 @@ Neither approach asks the question we actually want to answer: "Can we preferent
 
 <!-- TODO: Add concrete example of temperature/truncation effect
   @claude: Could reference G-2 here or embed a small table.
-  @loxifi: 
+  @loxifi: What would you consider an example of a temperature/truncation effect?
 -->
 
 ## 1.3 The Adaptive-P Solution
@@ -44,13 +44,3 @@ This creates several desirable properties:
 3. **Chain breaking**: High-confidence chains are disrupted because the sampler actively resists selecting 0.9+ probability tokens repeatedly. The first high-confidence token in a potential chain shifts the target downward, making alternatives more attractive for subsequent tokens.
 
 4. **Consistent behavior**: Unlike temperature (where the effect depends heavily on the input distribution's shape), the same target parameter produces similar selection patterns across different models and contexts.
-
-The following sections detail the algorithm's mathematical foundation, its relationship to existing methods, practical integration guidance, and empirical validation of its effectiveness.
-
-> **Graph [G-1]: Overview Comparison**  
-> *Placeholder for visualization showing input vs. output probability distributions for Temperature, Min-P, XTC, and Adaptive-P applied to the same real token distribution.*
-
-<!-- TODO: Data source for G-1
-  @claude: Suggest "prestigious" example (22 tokens) - mid-range leader + clustered tail.
-  @loxifi: 
--->
