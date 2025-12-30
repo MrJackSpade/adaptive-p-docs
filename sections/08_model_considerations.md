@@ -37,8 +37,11 @@ Users report less dramatic effects compared to temperature adjustment. This is e
 
 **Recommended settings:**
 - Target: 0.6–0.8 (work with available high-probability range)
-- Decay: 0.9 (default)
+- Decay: 0.7–0.85 (lower than default—see note below)
 - Min-P: 0.1 (aggressive cleanup since distribution is sharp anyway)
+
+> [!NOTE]
+> **Lower decay for peaked distributions:** With limited candidates, the sampler often has no choice but to select whatever's available. High decay (0.9+) causes the history to "remember" these forced high-probability selections, leading to fishtailing—the calculated target swings wildly trying to compensate for choices that weren't really choices. Lower decay (0.7–0.85) lets the sampler "forget" forced selections more quickly.
 
 **Alternative approach:**
 
@@ -79,24 +82,24 @@ Generate with logging enabled. Check:
 - What probability range are candidates in? (Available targeting space)
 - Does calculated target converge to configured? (Adaptation health)
 
-**Step 2: Adjust target**
+**Step 2: Adjust decay**
 
-If candidates cluster high (> 0.7), raise target.
-If candidates cluster low (< 0.2), lower target.
-Target should aim for where candidates actually exist.
+For peaked distributions, lower decay (0.7–0.85) helps prevent fishtailing from forced high-probability selections.
 
-**Step 3: Consider preprocessing**
+<!-- TODO: 
+  @loxifi: Define what fishtailing is, somewhere in the docs, so that the user knows what it is.
+-->
 
-If distribution is too peaked for any target to work well, add light temperature (1.1) before Adaptive-P.
+> [!CAUTION]
+> **Don't chase the cluster with target.** If candidates cluster at 0.8, setting target to 0.8 defeats Adaptive-P's purpose—you're just accepting what the model already wants to output. Instead, keep target at your desired creativity level and let the sampler work with available options.
 
-**Step 4: Adjust decay (rare)**
+**Step 3: Consider preprocessing (as last resort)**
+
+If distribution is too peaked for any target to work well, light temperature (1.1) before Adaptive-P can spread the distribution. Use sparingly—this is a workaround, not the intended workflow.
+
+**Step 4: Adjust decay**
 
 If outputs seem too variable, raise decay (0.95).
-If outputs seem stuck in patterns, lower decay (0.8).
+If outputs seem stuck or fishtailing, lower decay (0.7–0.8).
 
-Most users find target adjustment sufficient; decay rarely needs changing.
-
-<!-- TODO: Add concrete model-specific examples
-  @claude: Chat logs mention Gemma/Phi showing less dramatic effects.
-  @loxifi: 
--->
+Most users find default (0.9) works well; adjust if you notice oscillating behavior.

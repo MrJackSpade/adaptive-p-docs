@@ -17,6 +17,9 @@ If other samplers follow Adaptive-P, they would either:
 - Override its selection (making Adaptive-P pointless)
 - Operate on already-transformed logits (producing undefined behavior)
 
+> [!IMPORTANT]
+> **The transformation is destructive.** Adaptive-P doesn't just adjust logits—it *replaces* them entirely based on probability-to-target distance. The original model logits (which encode semantic meaning, confidence, etc.) are gone. This is why Adaptive-P must be last: no subsequent sampler could make sense of the transformed values, and the token selection happens as part of the transformation itself.
+
 **Recommended minimal chain:**
 
 ```
@@ -46,12 +49,6 @@ Min-P and Adaptive-P serve different, complementary purposes:
 | Purpose | Remove garbage | Select among quality |
 | Method | Truncation | Preference |
 | Output | Filtered candidates | Single selection |
-
-**The samples.log perspective:**
-
-All samples show tokens already filtered to p > 0.01. This filtering is min-p at work. Without it, the candidate pool would include thousands of garbage tokens at vanishingly small probabilities.
-
-Adaptive-P assumes this cleanup has happened. If garbage tokens remain in the pool, and they happen to be at a probability close to target (after normalization), they could be selected. Min-P prevents this edge case.
 
 **Recommended min_p values:**
 
@@ -97,29 +94,16 @@ Keep temperature at 1.0 (neutral) and use target for creativity control. If temp
 
 - **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. External repetition penalty becomes redundant.
 
-- **XTC:** Adaptive-P achieves XTC's goal (forceβconsideration of alternatives) more reliably and without the fat-tail redistribution problem. Users who previously relied on XTC typically disable it when using Adaptive-P.
+- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) more reliably and without the fat-tail redistribution problem. Users who previously relied on XTC typically disable it when using Adaptive-P.
 
-- **Mirostat:** Both target perplexity/entropy, but through different mechanisms. Running both would create conflicting control loops. Use one or the other.
+- **Mirostat:** Both target perplexity/entropy, but through different mechanisms. Additionally, Mirostat also requires being the final sampler in the chain—they cannot coexist. Use one or the other.
 
 ## 5.5 Implementation in llama.cpp
 
-Adaptive-P is integrated into the llama.cpp sampler infrastructure. Basic usage:
+> [!NOTE]
+> Adaptive-P for llama.cpp is available via [PR #17927](https://github.com/ggml-org/llama.cpp/pull/17927). Check the PR status for merge progress.
 
-```cpp
-// Create sampler chain
-struct llama_sampler * chain = llama_sampler_chain_init(params);
-
-// Add min-p guardrail
-llama_sampler_chain_add(chain, llama_sampler_init_min_p(0.05, 1));
-
-// Add adaptive-p as final sampler
-llama_sampler_chain_add(chain, 
-    llama_sampler_init_adaptive_p(
-        0.5f,    // target
-        0.9f,    // decay  
-        seed     // RNG seed
-    ));
-```
+Basic usage:
 
 **Parameter configuration:**
 

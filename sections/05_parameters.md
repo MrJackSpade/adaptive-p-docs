@@ -83,6 +83,16 @@ Decay doesn't change *where* the sampler targets—that's controlled by target. 
 
 Most users keep decay at default (0.9) and adjust only target.
 
+**Why decay is configurable:**
+
+Although 0.9 works well for most cases, edge cases require adjustment:
+
+- **Stubbornness (decay too high):** With decay 0.99, the sampler "remembers" history for ~100 tokens. If the first 50 tokens happened to be high-probability forced choices, the sampler stubbornly tries to compensate by targeting very low probabilities for the next 50—even when that's not ideal for the current context.
+
+- **Fishtailing (decay too low):** With decay 0.5, the sampler reacts to only the last 2-3 tokens. After one high-probability selection, it swings hard toward low probability; after one low selection, it swings back. The output "fishtails" between extremes rather than finding a stable average.
+
+- **Elasticity:** The ideal decay provides enough elasticity to return toward target without overcorrecting. Like a spring—too stiff and it fights every movement; too loose and it oscillates wildly.
+
 ## 4.3 Internal Constants
 
 The following values are fixed in the implementation and not user-configurable:
@@ -111,10 +121,15 @@ Scales the distance calculation. Effectively defines "nearby" in probability spa
 
 The inverse (INV_WIDTH = 5.0) appears in the transformation to avoid runtime division.
 
-<!-- TODO: Mention SHARPNESS design decision?
-  @claude: Chat logs discussed user-configurable SHARPNESS. Decided against for simplicity.
-  @loxifi: 
--->
+**Why SHARPNESS is not user-configurable:**
+
+Early development considered exposing SHARPNESS as a parameter. The decision to fix it came from two observations:
+
+1. **Confusing interaction with target:** Users expect "higher sharpness = stronger effect" but the relationship is non-linear. SHARPNESS interacts with DISTRIBUTION_WIDTH in ways that aren't intuitive—adjusting one without the other produces unexpected results.
+
+2. **Decay provides the needed control:** What users actually want when they'd reach for sharpness—"tighter" or "looser" adherence to target—is better achieved through decay, which has a more predictable effect.
+
+For advanced use cases, the constants can be modified in source.
 
 ## 4.4 Disabling Adaptive-P
 

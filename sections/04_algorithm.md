@@ -7,13 +7,14 @@ This section presents the complete algorithm, starting with conceptual foundatio
 The fundamental question Adaptive-P answers is not "which tokens are most likely?" but rather "which tokens occupy a specific probability range?"
 
 Consider a token distribution where:
-- Token A has probability 0.85
-- Token B has probability 0.10  
-- Token C has probability 0.05
+- Token A has probability 0.60
+- Token B has probability 0.25  
+- Token C has probability 0.10
+- Token D has probability 0.05
 
-Standard sampling will select Token A roughly 85% of the time. But what if we want to encourage selection of tokens in the 0.3–0.5 probability range—tokens the model considers "plausible but not dominant"?
+Standard sampling will select Token A roughly 60% of the time. But what if we want to encourage selection of tokens in the 0.2–0.4 probability range—tokens the model considers "plausible but not dominant"?
 
-Adaptive-P addresses this by applying a bell-curve transformation centered on the target probability. Tokens close to target receive high logits; distant tokens are suppressed. After softmax normalization, the resulting distribution favors tokens near the target.
+Adaptive-P addresses this by applying a bell-curve transformation centered on the target probability. If target is 0.3, Token B (at 0.25) becomes favored over Token A (at 0.60), even though Token A started with higher probability.
 
 > **Graph [G-7]: Illustrative Bell Curve**  
 > *Show the logit transformation curve centered at targets 0.3, 0.5, and 0.7. Label clearly as "illustrative of transformation function only" since real distributions are sparse and don't form continuous curves.*
@@ -29,31 +30,33 @@ In practice, candidate pools after min-p filtering show characteristic patterns 
 
 ### Pattern A: Forced Choice
 
-**Example from samples:** "hills" → `token 33966: 1.000000`
+**Example:** A distribution with a single token at probability 1.0.
 
 When only one token survives min-p filtering, the sampler has no choice. Adaptive-P passes through—the single token is selected regardless of its probability relative to target.
 
 **Implication:** Adaptive-P cannot create choices that don't exist. It operates on the candidates provided by earlier pipeline stages.
 
+**Effect on adaptive target:** The forced selection (probability 1.0) is recorded in history. If the configured target is 0.5, this high selection pushes the calculated target lower on subsequent steps—the sampler will compensate by preferring lower-probability options when choices become available again.
+
 ### Pattern B: Binary Split
 
-**Example from samples:** "green" → `token 33966: 0.944` vs `token 6176: 0.056`
+**Example:** Two candidates—one at 0.94, one at 0.06.
 
 Two candidates with a large probability gap. Both are viable (passed min-p), but one strongly dominates.
 
-**Effect:** If target is 0.5, neither token is close, but the lower-probability token is closer. The transformation dramatically shifts probability toward the underdog. In this case, the 0.056 token's post-transform probability rises to 0.545—becoming the majority choice.
+**Effect:** If target is 0.5, neither token is close. The 0.94 token is 0.44 away from target; the 0.06 token is also 0.44 away. Because they're nearly equidistant from target, the transformation produces nearly equal output probabilities—despite starting with a 94% vs 6% split. The underdog's post-transform probability rises to roughly 50%.
 
 This is the chain-breaking mechanism in action. A high-confidence token followed by another high-confidence prediction gets disrupted because the target-adjustment favors alternatives.
 
 ### Pattern C: Clustered Tail
 
-**Example from samples:** "prestigious" → `token 794: 0.301` + 21 tokens ranging 0.015–0.105
+**Example:** One token at 0.30, plus 20+ tokens clustered between 0.01–0.10.
 
 One mid-range leader with a cluster of low-probability alternatives. This is where the transformation's tail behavior matters most.
 
-**The clustering problem:** If transformation applies a floor (e.g., minimum logit of 0), all 21 tail tokens hit that floor after softmax. Each gets exp(0) = 1.0 relative score. Twenty-one tokens times 1.0 = 21.0 cumulative score. The leader at 0.301 might have logit 5.0, so exp(5.0) ≈ 148. Ratio: 148 / (148 + 21) ≈ 87% for leader, 13% for entire tail.
+**The clustering problem:** If transformation applies a floor (e.g., minimum logit of 0), all 20 tail tokens hit that floor after softmax. Each gets exp(0) = 1.0 relative score. Twenty tokens times 1.0 = 20.0 cumulative score. The leader at 0.30 might have logit 5.0, so exp(5.0) ≈ 148. Ratio: 148 / (148 + 20) ≈ 88% for leader, 12% for entire tail.
 
-That 13% split across 21 tokens seems okay, but imagine 100 tail tokens: now it's 148 / (148 + 100) ≈ 60% leader, 40% tail—significant garbage probability.
+That 12% split across 20 tokens seems okay, but imagine 100 tail tokens: now it's 148 / (148 + 100) ≈ 60% leader, 40% tail—significant garbage probability.
 
 **Adaptive-P's solution:** Unbounded negative logits. Each additional unit of distance from target produces another unit of negative logit, which translates to another order of magnitude less probability after softmax. The cluster never accumulates mass.
 
@@ -84,10 +87,10 @@ calculated_target = 2.0 × configured_target − weighted_average
 
 **Intuition:** If recent selections averaged 0.6 probability but the user wants 0.5, the calculated target drops to 0.4 to compensate. The algorithm "aims past" the configured target to pull the average back toward it.
 
-**From the samples:** Calculated targets range from 0.484 to 0.503 despite a fixed configured target of 0.5. This ~2% variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average.
+**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average.
 
 > **Graph [G-9]: Calculated Target Drift**  
-> *Time-series from samples.log showing calculated target fluctuation over 20+ tokens. Overlay the configured target as a flat reference line.*
+> *Time-series showing calculated target fluctuation over 20+ tokens. Overlay the configured target as a flat reference line.*
 
 <!-- TODO: G-9 needs clean version
   @claude: Image 0 shows bad init. Need normal operation version.
@@ -95,6 +98,9 @@ calculated_target = 2.0 × configured_target − weighted_average
 -->
 
 The calculated target is clamped to [0.0, 1.0] before use. Extreme historical selections can push the raw calculated value outside this range, but the clamping ensures the transformation remains well-defined.
+
+> [!NOTE]
+> Theoretically, an unclamped target could produce stronger logit differentiation—tokens within the [0,1] range would have more extreme logit differences due to greater distance from the unclamped value. In practice this provides little benefit: high-probability tokens can't cluster (there's only so much probability to go around), and low-probability tokens are already so close together in probability space as to be effectively indistinguishable.
 
 ## 3.4 The Logit Transformation
 
@@ -137,7 +143,7 @@ A transformation with a minimum logit floor (e.g., one that asymptotically appro
 
 This section addresses the clustering problem in detail, as it's the key insight that drove the algorithm design.
 
-**The setup:** Consider the "." token selection from samples.log—26 candidates ranging from 0.01 to 0.11 probability, none close to target 0.5.
+**The setup:** Consider a distribution with 26 candidates ranging from 0.01 to 0.11 probability, none close to target 0.5.
 
 **With a logit floor (bounded transformation):**
 - All 26 tokens are far from target
@@ -170,7 +176,13 @@ The transformation outputs raw logit values. Softmax converts these to probabili
 probability[i] = exp(logit[i]) / Σ exp(logit[j])
 ```
 
-**Key property:** Relative differences between logits matter, not absolute values. If we added a constant to all logits, the probabilities would be unchanged.
+**Key property:** Relative differences between logits matter, not absolute values. Adding a constant C to all logits doesn't change probabilities:
+
+```
+exp(logit + C) / Σ exp(logit_j + C)  =  exp(C) × exp(logit) / (exp(C) × Σ exp(logit_j))  =  exp(logit) / Σ exp(logit_j)
+```
+
+The exp(C) terms cancel out.
 
 This means PEAK_LOGIT_VALUE (5.0) is somewhat arbitrary—what matters is the *difference* between peak and suppressed logits.
 

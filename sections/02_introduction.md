@@ -24,10 +24,12 @@ Current sampling methods fall into two broad categories, neither of which solves
 
 Neither approach asks the question we actually want to answer: "Can we preferentially select tokens at a specific probability level?"
 
-<!-- TODO: Add concrete example of temperature/truncation effect
-  @claude: Could reference G-2 here or embed a small table.
-  @loxifi: What would you consider an example of a temperature/truncation effect?
--->
+**Example:** Consider three tokens with probabilities 0.7, 0.2, and 0.1:
+- **Temperature 1.5:** Flattens to roughly 0.5, 0.3, 0.2. The top token still dominates; low tokens get a boost but remain minority choices.
+- **Top-P 0.9:** Keeps all three (cumulative 1.0 > 0.9). No preference within the set—the 0.7 token is still selected 70% of the time.
+- **Min-P 0.15:** Keeps the 0.7 and 0.2 tokens (both above 0.7 × 0.15 = 0.105). Again, no preference—just truncation.
+
+None of these methods can say "prefer the 0.2 token over the 0.7 token."
 
 ## 1.3 The Adaptive-P Solution
 
