@@ -86,13 +86,9 @@ The weight of a selection N steps ago is `decay^N`. At decay 0.9, a selection 10
 
 Higher decay produces sharper selection curves. With decay 0.99, the sampler tightly clusters selections around target because any deviation is strongly compensated. With decay 0.5, the sampler allows more per-step variance because it quickly "forgets" previous selections.
 
-> **Graph [G-15]: Decay Effect Comparison**  
-> *Selection rate curves at decay 0.5, 0.7, 0.8, 0.9 with fixed target 0.5. Show how curve sharpness varies.*
+![Decay effect over extended generation](../charts/decay_long.png)
 
-<!-- TODO: G-15 may already exist
-  @claude: Image 1 shows exactly this comparison. May be usable directly.
-  @loxifi: 
--->
+*The chart above shows how different decay values affect selection behavior over an extended generation. Higher decay maintains tighter adherence to target probability over time.*
 
 **Interaction with target:**
 
