@@ -23,23 +23,21 @@ Target specifies the desired average probability of selected tokens. The sampler
 
 The following examples show the same prompt with different target values. Notice how lower targets produce more varied, surprising word choices while higher targets stay closer to conventional phrasing.
 
-**Prompt:** *"The old lighthouse stood at the edge of the cliff, its light"*
+**Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
-<!-- TODO: Generation samples needed
-  @loxifi: Please generate ~2-3 sentences for each target value using the same prompt and model.
--->
+**[Target 0.3 (Creative)](../samples/target_0.3_sample.md)**
+> *"My blood turns to icy slurry as a cold draft, utterly impossible in the humid heat, sweeps over the nape of my neck."*
 
-**Target 0.3 (Creative):**
-> [Sample generation to be added]
+**[Target 0.5 (Balanced)](../samples/target_0.5_sample.md)**
+> *"The whispers started again, not from the pipes this time, but from the empty cubicles beside me, low and wet and sounding like voices drowning in deep water."*
 
-**Target 0.5 (Balanced):**
-> [Sample generation to be added]
+**[Target 0.7 (Conservative)](../samples/target_0.7_sample.md)**
+> *"A cold, bony touch sliding up my calf, leaving a trail of goosebites that felt like frost."*
 
-**Target 0.7 (Conservative):**
-> [Sample generation to be added]
+**[Target 0.9 (Near-deterministic)](../samples/target_0.9_sample.md)**
+> *"The water wasn't just haunted; it was alive, and it had decided I was its next meal."*
 
-**Target 0.9 (Near-deterministic):**
-> [Sample generation to be added]
+Notice how target 0.3 produces unusual imagery ("icy slurry"), while 0.9 gravitates toward polished, conventional phrasing. Target 0.5 balances creativity with coherence; 0.7 executes familiar horror tropes cleanly.
 
 **Key property: Cross-model consistency**
 
@@ -51,13 +49,9 @@ This consistency arises because the targeting is defined in probability space, n
 
 Users report that the target parameter feels intuitive once understood. "I want the model to pick tokens it's about 40% confident in" translates directly to target 0.4. This contrasts with temperature where "temperature 1.2" has no obvious semantic meaning.
 
-> **Graph [G-14]: Target Effect on Selection Distribution**  
-> *Aggregate selection histograms from large generation runs at target 0.3, 0.5, 0.7, 0.9. Show how the selection peak shifts.*
+![Target effect on selection distribution](../charts/target_long.png)
 
-<!-- TODO: G-14 needs different target values
-  @claude: Image 1 shows target=0.5 with varying decay. Need target variants.
-  @loxifi: 
--->
+*Selection curves at decay 0.9 with target values 0.3, 0.5, 0.7, and 1.0. Lower targets (blue) peak earlier, boosting lower-probability tokens. Higher targets (green/orange) shift the peak rightward, staying closer to the model's natural predictions.*
 
 ## 4.2 Decay
 
@@ -86,9 +80,9 @@ The weight of a selection N steps ago is `decay^N`. At decay 0.9, a selection 10
 
 Higher decay produces sharper selection curves. With decay 0.99, the sampler tightly clusters selections around target because any deviation is strongly compensated. With decay 0.5, the sampler allows more per-step variance because it quickly "forgets" previous selections.
 
-![Decay effect over extended generation](../charts/decay_long.png)
+![Decay effect on selection distribution](../charts/decay_long.png)
 
-*The chart above shows how different decay values affect selection behavior over an extended generation. Higher decay maintains tighter adherence to target probability over time.*
+*Selection curves at target 0.5 with decay values from 0.5 to 0.99. Higher decay (purple/cyan) produces a sharper peak, concentrating selections around 0.5–0.6 probability. Lower decay (blue/red) produces flatter curves closer to baseline, allowing more variance in selection.*
 
 **Interaction with target:**
 

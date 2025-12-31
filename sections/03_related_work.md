@@ -21,13 +21,15 @@ Temperature affects all tokens uniformly. It cannot express preferences like "I 
 
 The effect is also highly dependent on the input distribution's shape. Applying T=1.2 to a peaked distribution (one token at 0.8) produces a very different result than applying it to a flat distribution (many tokens around 0.1). This makes temperature difficult to tune consistently across different models and contexts.
 
-> **Graph [G-2]: Temperature Effect on Real Distribution**  
-> *Show a real multi-token distribution (e.g., the 18-token "serene" case from samples.log) with pre/post-softmax probabilities at T=0.5, T=1.0, T=1.5. Demonstrate that temperature shifts everything uniformly rather than targeting a range.*
+![Temperature effect on selection distribution](../charts/temperature_long.png)
 
-<!-- TODO: G-2 data source
-  @claude: Suggest "serene" example (18 tokens) with nice spread.
-  @loxifi: 
--->
+*Temperature uniformly scales the selection curve. Low temperature (0.0–0.5) creates steep curves favoring high-probability tokens. High temperature (2.0–5.0) flattens everything, spreading selections across the probability range with no preference.*
+
+**Contrast with Adaptive-P:**
+
+![Adaptive-P target effect](../charts/target_long.png)
+
+*Adaptive-P creates a distinct peak at the target probability. Unlike temperature's uniform scaling, Adaptive-P expresses preference: "boost tokens around 0.3" (blue) or "stay near 0.7" (green). The peak location is controllable; temperature cannot achieve this targeted behavior.*
 
 ## 2.2 Top-K Sampling
 
@@ -111,13 +113,17 @@ Users report that XTC produces unpredictable results. Some generations are excel
 
 The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Users describe "never knowing what you were going to get."
 
-> **Graph [G-4]: XTC Redistribution Failure**  
-> *Demonstrate uniform redistribution spreading probability to low-quality tail tokens. Show the fat tail problem. Compare to Adaptive-P's selective redistribution which doesn't have this issue.*
+**XTC Redistribution:**
 
-<!-- TODO: G-4 data (XTC fat tail)
-  @claude: May need simulated data or theoretical calculation.
-  @loxifi: 
--->
+![XTC fat tail problem](../charts/xtc_fat_tail.png)
+
+*When XTC removes the 0.6 probability token, the freed mass redistributes uniformly. All tokens in the low-probability cluster (0.02–0.10) get boosted above baseline (green lines up). The selection lands in this garbage cluster.*
+
+**Adaptive-P Selective Redistribution:**
+
+![Adaptive-P selective redistribution](../charts/adaptive_no_tail.png)
+
+*Adaptive-P targeting 0.5: the 0.65 token is suppressed, but only the token closest to target (0.25) receives a significant boost. Low-probability tokens are pushed DOWN further (red lines), not up. Probability concentrates on near-target candidates, avoiding the tail entirely.*
 
 ## 2.6 Mirostat
 
@@ -175,13 +181,4 @@ When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With unifo
 
 This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get garbage as to get a coherent alternative. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
 
-> **Graph [G-5]: Selective Redistribution on Real Distribution**  
-> *Use the "prestigious" sample (22 tokens: one at 0.30, rest at 0.02-0.10). Show how the exponential dropoff prevents clustered low tokens from accumulating probability. Contrast with what uniform redistribution would produce.*
-
-> **Graph [G-6]: Selective vs. Uniform Redistribution Comparison**  
-> *Side-by-side: XTC-style uniform redistribution showing fat tail vs. Adaptive-P selective redistribution showing focused distribution around target.*
-
-<!-- TODO: Combine G-5 and G-6?
-  @claude: Could be single visualization with two panels.
-  @loxifi: 
--->
+The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC boosts all tail tokens uniformly, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.

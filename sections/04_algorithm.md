@@ -87,15 +87,7 @@ calculated_target = 2.0 × configured_target − weighted_average
 
 **Intuition:** If recent selections averaged 0.6 probability but the user wants 0.5, the calculated target drops to 0.4 to compensate. The algorithm "aims past" the configured target to pull the average back toward it.
 
-**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average.
-
-> **Graph [G-9]: Calculated Target Drift**  
-> *Time-series showing calculated target fluctuation over 20+ tokens. Overlay the configured target as a flat reference line.*
-
-<!-- TODO: G-9 needs clean version
-  @claude: Image 0 shows bad init. Need normal operation version.
-  @loxifi: 
--->
+**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average. See Section 6.2 for charts showing this behavior at different decay values.
 
 The calculated target is clamped to [0.0, 1.0] before use. Extreme historical selections can push the raw calculated value outside this range, but the clamping ensures the transformation remains well-defined.
 
@@ -165,8 +157,7 @@ The practical difference:
 
 This is the "selective redistribution" property. Probability doesn't flow uniformly to all candidates—it concentrates on those closest to target.
 
-> **Graph [G-11]: Cluster Pile-up Comparison**  
-> *The "." token case (26 candidates). Show post-softmax probabilities for floor-based vs. unbounded transformation.*
+The XTC comparison charts in Section 2.5 illustrate this directly: XTC's uniform redistribution boosts all tail tokens (green lines up), while Adaptive-P concentrates probability on near-target tokens and suppresses the tail (red lines down).
 
 ## 3.6 Softmax Normalization
 
