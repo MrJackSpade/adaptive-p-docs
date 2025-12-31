@@ -19,6 +19,28 @@ Target specifies the desired average probability of selected tokens. The sampler
 | 0.7 | Stays closer to model's top predictions | Factual content, coherence-critical |
 | 0.9+ | Nearly deterministic | When accuracy matters most |
 
+### Generation Showcase
+
+The following examples show the same prompt with different target values. Notice how lower targets produce more varied, surprising word choices while higher targets stay closer to conventional phrasing.
+
+**Prompt:** *"The old lighthouse stood at the edge of the cliff, its light"*
+
+<!-- TODO: Generation samples needed
+  @loxifi: Please generate ~2-3 sentences for each target value using the same prompt and model.
+-->
+
+**Target 0.3 (Creative):**
+> [Sample generation to be added]
+
+**Target 0.5 (Balanced):**
+> [Sample generation to be added]
+
+**Target 0.7 (Conservative):**
+> [Sample generation to be added]
+
+**Target 0.9 (Near-deterministic):**
+> [Sample generation to be added]
+
 **Key property: Cross-model consistency**
 
 Unlike temperature, which produces different effects depending on input distribution shape, target behaves consistently across models. Target 0.5 on Llama produces similar *selection patterns* to target 0.5 on Mistral, even though the underlying token distributions differ.
