@@ -49,10 +49,6 @@ This consistency arises because the targeting is defined in probability space, n
 
 Users report that the target parameter feels intuitive once understood. "I want the model to pick tokens it's about 40% confident in" translates directly to target 0.4. This contrasts with temperature where "temperature 1.2" has no obvious semantic meaning.
 
-![Target effect on selection distribution](../charts/target_long.png)
-
-*Selection curves at decay 0.9 with target values 0.3, 0.5, 0.7, and 1.0. Lower targets (blue) peak earlier, boosting lower-probability tokens. Higher targets (green/orange) shift the peak rightward, staying closer to the model's natural predictions.*
-
 ## 4.2 Decay
 
 **Range:** 0.0 to 0.99
@@ -80,9 +76,12 @@ The weight of a selection N steps ago is `decay^N`. At decay 0.9, a selection 10
 
 Higher decay produces sharper selection curves. With decay 0.99, the sampler tightly clusters selections around target because any deviation is strongly compensated. With decay 0.5, the sampler allows more per-step variance because it quickly "forgets" previous selections.
 
-![Decay effect on selection distribution](../charts/decay_long.png)
-
-*Selection curves at target 0.5 with decay values from 0.5 to 0.99. Higher decay (purple/cyan) produces a sharper peak, concentrating selections around 0.5–0.6 probability. Lower decay (blue/red) produces flatter curves closer to baseline, allowing more variance in selection.*
+<table>
+<tr>
+<td width="50%"><img src="../charts/target_long.png" width="100%"><br><em>Target effect: Lower targets peak earlier; higher targets stay closer to natural predictions.</em></td>
+<td width="50%"><img src="../charts/decay_long.png" width="100%"><br><em>Decay effect: Higher decay produces sharper peaks around target.</em></td>
+</tr>
+</table>
 
 **Interaction with target:**
 

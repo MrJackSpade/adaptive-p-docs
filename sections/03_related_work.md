@@ -21,15 +21,12 @@ Temperature affects all tokens uniformly. It cannot express preferences like "I 
 
 The effect is also highly dependent on the input distribution's shape. Applying T=1.2 to a peaked distribution (one token at 0.8) produces a very different result than applying it to a flat distribution (many tokens around 0.1). This makes temperature difficult to tune consistently across different models and contexts.
 
-![Temperature effect on selection distribution](../charts/temperature_long.png)
-
-*Temperature uniformly scales the selection curve. Low temperature (0.0–0.5) creates steep curves favoring high-probability tokens. High temperature (2.0–5.0) flattens everything, spreading selections across the probability range with no preference.*
-
-**Contrast with Adaptive-P:**
-
-![Adaptive-P target effect](../charts/target_long.png)
-
-*Adaptive-P creates a distinct peak at the target probability. Unlike temperature's uniform scaling, Adaptive-P expresses preference: "boost tokens around 0.3" (blue) or "stay near 0.7" (green). The peak location is controllable; temperature cannot achieve this targeted behavior.*
+<table>
+<tr>
+<td width="50%"><img src="../charts/temperature_long.png" width="100%"><br><em>Temperature uniformly scales: low temp favors high-p, high temp flattens everything.</em></td>
+<td width="50%"><img src="../charts/target_long.png" width="100%"><br><em>Adaptive-P creates a controllable peak at the target probability.</em></td>
+</tr>
+</table>
 
 ## 2.2 Top-K Sampling
 
@@ -113,17 +110,12 @@ Users report that XTC produces unpredictable results. Some generations are excel
 
 The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Users describe "never knowing what you were going to get."
 
-**XTC Redistribution:**
-
-![XTC fat tail problem](../charts/xtc_fat_tail.png)
-
-*When XTC removes the 0.6 probability token, the freed mass redistributes uniformly. All tokens in the low-probability cluster (0.02–0.10) get boosted above baseline (green lines up). The selection lands in this garbage cluster.*
-
-**Adaptive-P Selective Redistribution:**
-
-![Adaptive-P selective redistribution](../charts/adaptive_no_tail.png)
-
-*Adaptive-P targeting 0.5: the 0.65 token is suppressed, but only the token closest to target (0.25) receives a significant boost. Low-probability tokens are pushed DOWN further (red lines), not up. Probability concentrates on near-target candidates, avoiding the tail entirely.*
+<table>
+<tr>
+<td width="50%"><strong>XTC Redistribution:</strong><br><img src="../charts/xtc_fat_tail.png" width="100%"><br><em>XTC: All tail tokens get boosted (green lines up).</em></td>
+<td width="50%"><strong>Adaptive-P:</strong><br><img src="../charts/adaptive_no_tail.png" width="100%"><br><em>Adaptive-P: Only near-target tokens boosted; tail suppressed.</em></td>
+</tr>
+</table>
 
 ## 2.6 Mirostat
 

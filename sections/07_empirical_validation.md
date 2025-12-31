@@ -18,17 +18,16 @@ Selection frequency should peak near the target probability. Tokens at input pro
 
 The following scatter plots show selection behavior at different target values. Orange dots are available candidates; green dots are selected tokens; grey line is the calculated (clamped) target.
 
-![Target 0.3 selection scatter](../charts/target_0.3.png)
-*Target 0.3: Selections cluster around 0.3–0.4, consistently avoiding high-probability tokens even when available.*
-
-![Target 0.5 selection scatter](../charts/target_0.5.png)
-*Target 0.5: Selections favor the mid-range (0.5–0.7), with the calculated target oscillating around 0.55.*
-
-![Target 0.7 selection scatter](../charts/target_0.7.png)
-*Target 0.7: Selections shift toward high-probability tokens (0.7–1.0), often selecting the most likely candidate.*
-
-![Target 1.0 selection scatter](../charts/target_1.0.png)
-*Target 1.0: Nearly greedy behavior—almost all selections at p=1.0. Functionally equivalent to temperature 0.*
+<table>
+<tr>
+<td width="50%"><img src="../charts/target_0.3.png" width="100%"><br><em>Target 0.3: Selections cluster around 0.3–0.4, avoiding high-probability tokens.</em></td>
+<td width="50%"><img src="../charts/target_0.5.png" width="100%"><br><em>Target 0.5: Selections favor mid-range (0.5–0.7).</em></td>
+</tr>
+<tr>
+<td width="50%"><img src="../charts/target_0.7.png" width="100%"><br><em>Target 0.7: Selections shift toward 0.7–1.0.</em></td>
+<td width="50%"><img src="../charts/target_1.0.png" width="100%"><br><em>Target 1.0: Nearly greedy—almost all at p=1.0.</em></td>
+</tr>
+</table>
 
 **Interpreting the scatter:**
 
@@ -49,14 +48,15 @@ After initial warmup (if any), the rolling average should stabilize near the con
 
 The following charts show calculated target over time at decay 0.5, 0.9, and 0.99 (all at target 0.5):
 
-![Decay 0.5 target convergence](../charts/target_d0.5.png)
-*Decay 0.5: Large oscillations (0.3–0.8 range). The sampler reacts strongly to recent selections, causing fishtailing behavior.*
-
-![Decay 0.9 target convergence](../charts/target_d0.9.png)
-*Decay 0.9 (default): Moderate oscillations (0.45–0.65 range). Balanced responsiveness—tracks toward target without overcorrecting.*
-
-![Decay 0.99 target convergence](../charts/target_d0.99.png)
-*Decay 0.99: Very tight oscillations (0.48–0.55 range). Almost flat—long history window dampens all variation.*
+<table>
+<tr>
+<td width="50%"><img src="../charts/target_d0.5.png" width="100%"><br><em>Decay 0.5: Large oscillations (fishtailing).</em></td>
+<td width="50%"><img src="../charts/target_d0.9.png" width="100%"><br><em>Decay 0.9: Balanced responsiveness.</em></td>
+</tr>
+<tr>
+<td colspan="2" align="center" width="50%"><img src="../charts/target_d0.99.png" width="50%"><br><em>Decay 0.99: Very tight oscillations—nearly flat.</em></td>
+</tr>
+</table>
 
 ## 6.3 Contrast with Baseline Methods
 
@@ -98,17 +98,12 @@ We verify that correct initialization prevents the warmup artifacts shown with n
 | Naive (0, 0) | Calculated target starts at configured, spikes low on first high selection, slowly recovers | Normal |
 | Correct (formula) | Calculated target stable from start | Normal |
 
-**Bad initialization (naive):**
-
-![Bad initialization recovery curve](../charts/bad_init.png)
-
-*With naive initialization (weighted_sum=0, total_weight=0), the first high-probability selection causes a massive overcorrection. The calculated target drops to nearly 0, then spends ~100 tokens slowly recovering to the configured 0.5.*
-
-**Correct initialization:**
-
-![Correct initialization - stable from start](../charts/target_d0.9.png)
-
-*With correct initialization (using the formula from Section 3.7), the calculated target oscillates stably around 0.5 from the very first token. No warmup period required.*
+<table>
+<tr>
+<td width="50%"><strong>Bad initialization (naive):</strong><br><img src="../charts/bad_init.png" width="100%"><br><em>Naive init: Target drops to 0, takes ~100 tokens to recover.</em></td>
+<td width="50%"><strong>Correct initialization:</strong><br><img src="../charts/target_d0.9.png" width="100%"><br><em>Correct init: Target stable from first token.</em></td>
+</tr>
+</table>
 
 ## 6.6 Cross-Model Consistency
 
@@ -140,17 +135,12 @@ All models show peaked selection rate near 0.5. The peak height may vary (models
 
 An unexpected benefit of Adaptive-P is improved generation stability over extended outputs. The cumulative average probability of selected tokens remains stable throughout generation, while temperature sampling shows continuous drift.
 
-**Temperature Sampling:**
-
-![Temperature stability over time](../charts/temp_stability.png)
-
-*Cumulative average probability drifts continuously. Low temperatures (red, green) trend upward over 250 samples. The model enters feedback loops where probability extremes compound.*
-
-**Adaptive-P:**
-
-![Adaptive-P stability over time](../charts/adaptive_p_stability.png)
-
-*Cumulative average stabilizes after ~50 tokens and maintains that level through 1000+ samples. Each target level finds its equilibrium and holds it.*
+<table>
+<tr>
+<td width="50%"><strong>Temperature Sampling:</strong><br><img src="../charts/temp_stability.png" width="100%"><br><em>Cumulative average drifts continuously over time.</em></td>
+<td width="50%"><strong>Adaptive-P:</strong><br><img src="../charts/adaptive_p_stability.png" width="100%"><br><em>Cumulative average stabilizes after ~50 tokens.</em></td>
+</tr>
+</table>
 
 ### Why This Matters
 
