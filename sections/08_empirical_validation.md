@@ -32,7 +32,7 @@ The primary claim of Adaptive-P is that it targets specific probability ranges. 
 
 **Methodology:**
 
-Generate 25,000+ tokens across varied prompts with Adaptive-P at target 0.5, decay 0.9. For each token selection, record:
+Generate 25,000+ tokens across varied prompts with Adaptive-P various targets, decay 0.9. For each token selection, record:
 - Input probability (from original distribution)
 - Whether this token was selected
 - Post-transform probability (from Adaptive-P distribution)
