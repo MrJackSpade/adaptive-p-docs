@@ -195,7 +195,10 @@ static struct llama_sampler * llama_sampler_adaptive_p_clone(
 
 ## 8.7 Porting Notes
 
-**For Python implementations:**
+> [!CAUTION]
+> **The Python implementation below is provided for reference only and has not been tested.** Use with caution and verify correctness before use in production.
+
+**Python reference implementation:**
 
 ```python
 import numpy as np
@@ -252,7 +255,3 @@ def softmax(x):
 | Hugging Face | `LogitsProcessor` subclass |
 | exllamav2 | Sampler settings |
 
-<!-- TODO: Python implementation untested
-  @claude: Verify correctness before publishing.
-  @loxifi: 
--->

@@ -27,7 +27,7 @@ Neither approach asks the question we actually want to answer: "Can we preferent
 **Example:** Consider three tokens with probabilities 0.7, 0.2, and 0.1:
 - **Temperature 1.5:** Flattens to roughly 0.5, 0.3, 0.2. The top token still dominates; low tokens get a boost but remain minority choices.
 - **Top-P 0.9:** Keeps all three (cumulative 1.0 > 0.9). No preference within the set—the 0.7 token is still selected 70% of the time.
-- **Min-P 0.15:** Keeps the 0.7 and 0.2 tokens (both above 0.7 × 0.15 = 0.105). Again, no preference—just truncation.
+- **Min-P 0.15:** Keeps the 0.7 and 0.2 tokens. Again, no preference—just truncation.
 
 None of these methods can say "prefer the 0.2 token over the 0.7 token."
 

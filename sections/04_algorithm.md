@@ -16,13 +16,9 @@ Standard sampling will select Token A roughly 60% of the time. But what if we wa
 
 Adaptive-P addresses this by applying a bell-curve transformation centered on the target probability. If target is 0.3, Token B (at 0.25) becomes favored over Token A (at 0.60), even though Token A started with higher probability.
 
-> **Graph [G-7]: Illustrative Bell Curve**  
-> *Show the logit transformation curve centered at targets 0.3, 0.5, and 0.7. Label clearly as "illustrative of transformation function only" since real distributions are sparse and don't form continuous curves.*
+![Adaptive-P transformation curve showing bell curves centered at targets 0.3, 0.5, and 0.7](../charts/g7_bell_curve.png)
 
-<!-- TODO: G-7 must be labeled as illustrative
-  @claude: Real distributions are sparse/clustered, won't match smooth curve.
-  @loxifi: 
--->
+*Illustrative of transformation function only—real token distributions are sparse/clustered.*
 
 ## 3.2 Real Distribution Behavior
 
@@ -68,8 +64,7 @@ Two tokens close in probability, both reasonably near target. This is where the 
 
 **Effect:** The quadratic shape provides fine differentiation between close candidates. A token at distance 0.02 from target gets a noticeably different logit than one at distance 0.08, allowing the sampler to express graduated preference rather than treating all near-target tokens identically.
 
-> **Graph [G-8]: Four Pattern Examples**  
-> *Four panels showing input probabilities → output probabilities for each pattern type. Use actual data from samples.log.*
+![Four pattern examples showing input vs output probability transformations](../charts/g8_patterns.png)
 
 ## 3.3 Configured Target vs. Calculated Target
 
@@ -124,8 +119,7 @@ The `dist² / (1 + dist)` function has critical properties:
 
 - **Transition region:** Smooth interpolation between behaviors. No discontinuities or kinks.
 
-> **Graph [G-10]: Transformation Function Shape**  
-> *Plot the function PEAK - SHARPNESS × dist² / (1 + dist) showing the quadratic core transitioning to linear tails. Annotate the key regions.*
+![Transformation function shape showing quadratic core transitioning to linear tails](../charts/g10_transform_shape.png)
 
 **Why not a floor-based transformation?**
 
@@ -181,8 +175,7 @@ This means PEAK_LOGIT_VALUE (5.0) is somewhat arbitrary—what matters is the *d
 
 Softmax's exponential nature amplifies the unbounded negative property. A logit difference of 10 produces a probability ratio of exp(10) ≈ 22,000. Very distant tokens become negligible contributors even without explicit removal.
 
-> **Graph [G-12]: Pre vs. Post Softmax**  
-> *Show raw logit values and corresponding post-softmax probabilities for a real sample. Demonstrate how the exponential amplifies differences.*
+![Pre vs post softmax comparison showing logits and probabilities](../charts/g12_softmax.png)
 
 ## 3.7 History State and Initialization
 

@@ -58,9 +58,6 @@ Min-P and Adaptive-P serve different, complementary purposes:
 | Creative writing | 0.03 |
 | Code generation | 0.1 |
 
-> **Graph [G-16]: Combined Pipeline Effect**  
-> *Full vocabulary → min-p filter → Adaptive-P transform → final selection. Show probability mass at each stage.*
-
 ## 6.3 Temperature Interaction
 
 Temperature can be used before Adaptive-P, but with caveats:

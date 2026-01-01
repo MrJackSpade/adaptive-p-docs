@@ -85,9 +85,9 @@ The stabilizing effect of min-p on low-target generations is best demonstrated t
 
 **Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
-**[Target 0 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
+**[Target 0.1 WITHOUT Min-P](../samples/target_0.1_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
 
-**[Target 0 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
+**[Target 0.1 WITH Min-P 0.1](../samples/target_0.1_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
 
 ## 2.5 XTC (eXclude Top Choices)
 
