@@ -81,7 +81,7 @@ The samples in this paper show tokens already filtered to p > 0.01—that's min-
 
 ### Min-P as Guardrail: Text Comparison
 
-The stabilizing effect of min-p on low-target generations is best demonstrated through reading. With target 0 (maximum creativity), Adaptive-P aggressively prefers the lowest-probability tokens. Without min-p, garbage tokens become valid selections. With min-p, only quality candidates remain.
+The stabilizing effect of min-p on low-target generations is best demonstrated through reading. With target 0.1 (maximum creativity), Adaptive-P aggressively prefers the lowest-probability tokens. Without min-p, garbage tokens become valid selections. With min-p, only quality candidates remain.
 
 **Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
