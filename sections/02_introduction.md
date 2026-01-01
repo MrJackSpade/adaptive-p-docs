@@ -12,15 +12,15 @@ This behavior manifests in practical terms as:
 - **Predictable narratives**: Story beats following the most common patterns from training data
 - **Formulaic output**: Text that feels AI-generated—technically correct but lacking authentic voice (sometimes called "slop" in practitioner communities)
 
-The root cause isn't the model's knowledge—modern LLMs encode vast linguistic diversity. The problem is that standard sampling methods don't provide a mechanism to *access* that diversity in a controlled way.
+The root cause isn't the model's knowledge—modern LLMs encode vast linguistic diversity, after all. The problem is that existing sampling methods don't provide a mechanism to access that diversity in a controlled and predictable way.
 
-## 1.2 Why Existing Approaches Fall Short
+## 1.2 Existing Approaches
 
-Current sampling methods fall into two broad categories, neither of which solves the high-confidence chain problem:
+Current sampling methods fall into two broad categories, neither of which directly addresse the high-confidence chain problem:
 
-**Scaling approaches** (temperature) multiply all logits by a constant factor. This uniformly spreads probability mass but provides no way to *target* a specific probability range. High temperature makes everything more random, including garbage tokens. Low temperature makes everything more deterministic, reinforcing the chain problem.
+**Scaling approaches** (Temperature) multiply all logits by a constant factor. This uniformly spreads probability mass but provides no way to target a specific probability range. High temperature makes everything equally more random, including low P tokens. Low temperature makes everything more deterministic, reinforcing the chain problem.
 
-**Truncation approaches** (top-k, top-p, min-p) remove tokens below some threshold and renormalize. This is a binary decision—tokens are either in the candidate pool or excluded entirely. Within the remaining pool, there's no preference mechanism. If the top token has 0.6 probability after truncation, it will be selected roughly 60% of the time regardless of whether the user wants more varied output.
+**Truncation approaches** (Top-K, Top-P, Min-P) remove tokens below some threshold and renormalize. This is a binary decision—tokens are either in the candidate pool or excluded entirely. Within the remaining pool, there's no preference mechanism. If the top token has 0.6 probability after truncation, it will be selected roughly 60% of the time regardless of whether the user wants more varied output.
 
 Neither approach asks the question we actually want to answer: "Can we preferentially select tokens at a specific probability level?"
 
@@ -45,7 +45,4 @@ This creates several desirable properties:
 
 3. **Chain breaking**: High-confidence chains are disrupted because the sampler actively resists selecting 0.9+ probability tokens repeatedly. The first high-confidence token in a potential chain shifts the target downward, making alternatives more attractive for subsequent tokens.
 
-4. **Consistent behavior**: Unlike temperature (where the effect depends heavily on the input distribution's shape), the same target parameter produces similar selection patterns across different models and contexts.
-
-[!NOTE]
-Intended Use Case: Adaptive-P is designed for creative text generation—fiction, roleplay, brainstorming—where predictability is undesirable. It is not intended for factual Q&A, summarization, or tasks where accuracy matters more than variety. Evaluation metrics throughout this paper reflect this scope: we measure whether the sampler hits its probability targets, not whether output matches predictable references.
+4. **Consistent behavior**: Unlike Temperature scaling (where the effect depends heavily on the input distribution's shape), the same target parameter produces similar selection patterns across different models and contexts.
