@@ -1,8 +1,8 @@
-# 8. Implementation Reference
+# 7. Implementation Reference
 
 This section provides the complete implementation for reference and porting to other frameworks.
 
-## 8.1 Data Structures
+## 7.1 Data Structures
 
 ```cpp
 struct llama_sampler_adaptive_p {
@@ -21,7 +21,7 @@ struct llama_sampler_adaptive_p {
 };
 ```
 
-## 8.2 Constants
+## 7.2 Constants
 
 ```cpp
 #define PEAK_LOGIT_VALUE    5.0f    // Maximum logit for on-target tokens
@@ -30,7 +30,7 @@ struct llama_sampler_adaptive_p {
 #define INV_WIDTH           (1.0f / DISTRIBUTION_WIDTH)  // Precomputed inverse
 ```
 
-## 8.3 Initialization
+## 7.3 Initialization
 
 ```cpp
 struct llama_sampler * llama_sampler_init_adaptive_p(
@@ -58,7 +58,7 @@ struct llama_sampler * llama_sampler_init_adaptive_p(
 
 **Critical:** The weighted_sum and total_weight initialization prevents warmup artifacts. Starting at (0, 0) would cause the calculated target to spike low on first high-probability selection.
 
-## 8.4 Core Algorithm
+## 7.4 Core Algorithm
 
 ```cpp
 static void llama_sampler_adaptive_p_apply(
@@ -121,7 +121,7 @@ static void llama_sampler_adaptive_p_apply(
 }
 ```
 
-## 8.5 Supporting Functions
+## 7.5 Supporting Functions
 
 **Softmax implementation** (typical):
 
@@ -168,7 +168,7 @@ static int llama_sample_dist(
 }
 ```
 
-## 8.6 Reset and Clone
+## 7.6 Reset and Clone
 
 For proper sampler lifecycle management:
 
@@ -193,7 +193,7 @@ static struct llama_sampler * llama_sampler_adaptive_p_clone(
 }
 ```
 
-## 8.7 Porting Notes
+## 7.7 Porting Notes
 
 > [!CAUTION]
 > **The Python implementation below is provided for reference only and has not been tested.** Use with caution and verify correctness before use in production.

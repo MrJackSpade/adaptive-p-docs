@@ -1,6 +1,6 @@
-# 9. Conclusion
+# 8. Conclusion
 
-## 9.1 Summary
+## 8.1 Summary
 
 We have presented Adaptive-P, a novel sampling method for autoregressive language models that introduces probability targeting as an alternative to traditional truncation and scaling approaches.
 
@@ -21,7 +21,7 @@ Adaptive-P applies a distance-based transformation that preferentially selects t
 3. **No fat tails:** Unlike XTC-style redistribution, probability concentrates on near-target tokens rather than spreading to garbage
 
 
-## 9.2 Contributions
+## 8.2 Contributions
 
 This work makes the following contributions:
 
@@ -33,7 +33,7 @@ This work makes the following contributions:
 
 4. **Validation:** Empirical demonstration that Adaptive-P achieves its targeting goal across varied models and prompts.
 
-## 9.3 Limitations
+## 8.3 Limitations
 
 **Adaptive-P cannot create diversity that doesn't exist.** If a model's distribution has only one viable token (p ≈ 1.0), or all candidates are far from target, the sampler cannot manufacture mid-range options. It operates on available candidates.
 
@@ -41,7 +41,7 @@ This work makes the following contributions:
 
 **Parameter tuning still required.** While "target" is more intuitive than "temperature," users must still learn what probability range produces their desired output quality. The default (0.5) works well for many cases but isn't universal.
 
-## 9.4 Future Work
+## 8.4 Future Work
 
 **Adaptive constants:** The current SHARPNESS value (10.0) was empirically tuned. Automatic tuning based on input distribution characteristics could improve robustness.
 
@@ -51,7 +51,7 @@ This work makes the following contributions:
 
 **Broader framework support:** Current implementation targets llama.cpp. Ports to vLLM, Hugging Face Transformers, and other popular frameworks would increase accessibility.
 
-## 9.5 Availability
+## 8.5 Availability
 
 Adaptive-P is implemented in llama.cpp and available via PR to the main repository. Source code and documentation are provided under permissive license.
 

@@ -10,7 +10,7 @@ This behavior manifests in practical terms as:
 - **Repetitive phrasing**: The same sentence structures and word choices appearing across generations
 - **Generic descriptions**: "The room was dimly lit" instead of more specific, evocative language  
 - **Predictable narratives**: Story beats following the most common patterns from training data
-- **Slop**: The community term for output that feels AI-generated—technically correct but lacking authentic voice
+- **Formulaic output**: Text that feels AI-generated—technically correct but lacking authentic voice (sometimes called "slop" in practitioner communities)
 
 The root cause isn't the model's knowledge—modern LLMs encode vast linguistic diversity. The problem is that standard sampling methods don't provide a mechanism to *access* that diversity in a controlled way.
 
@@ -29,7 +29,7 @@ Neither approach asks the question we actually want to answer: "Can we preferent
 - **Top-P 0.9:** Keeps all three (cumulative 1.0 > 0.9). No preference within the set—the 0.7 token is still selected 70% of the time.
 - **Min-P 0.15:** Keeps the 0.7 and 0.2 tokens. Again, no preference—just truncation.
 
-None of these methods can say "prefer the 0.2 token over the 0.7 token."
+These methods are designed for different goals—none are intended to express preferences like "prefer the 0.2 token over the 0.7 token."
 
 ## 1.3 The Adaptive-P Solution
 

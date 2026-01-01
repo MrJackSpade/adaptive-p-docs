@@ -128,7 +128,7 @@ Mirostat was the original inspiration for Adaptive-P. It targets a specific perp
 2. If perplexity is below target, increase K (allow more options)
 3. If perplexity is above target, decrease K (restrict options)
 
-**Why It Fails with Modern Models:**
+**Observed Limitations with Modern Models:**
 
 Mirostat was designed when model probability distributions were broader. A Top-K adjustment from 50 to 100 meaningfully changed the candidate pool.
 

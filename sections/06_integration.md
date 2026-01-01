@@ -1,8 +1,8 @@
-# 6. Integration and Sampler Chain
+# 5. Integration and Sampler Chain
 
 This section provides practical guidance for integrating Adaptive-P into existing LLM inference pipelines.
 
-## 6.1 Chain Positioning
+## 5.1 Chain Positioning
 
 **Critical requirement:** Adaptive-P must be the **last** sampler in the chain.
 
@@ -40,7 +40,7 @@ This chain:
 3. Temperature: Optional distribution shaping (mild values only)
 4. Adaptive-P: Final selection with probability targeting
 
-## 6.2 Why Min-P Complements Adaptive-P
+## 5.2 Why Min-P Complements Adaptive-P
 
 Min-P and Adaptive-P serve different, complementary purposes:
 
@@ -58,7 +58,7 @@ Min-P and Adaptive-P serve different, complementary purposes:
 | Creative writing | 0.03 |
 | Code generation | 0.1 |
 
-## 6.3 Temperature Interaction
+## 5.3 Temperature Interaction
 
 Temperature can be used before Adaptive-P, but with caveats:
 
@@ -79,7 +79,7 @@ The difference is controllability. Temperature affects the whole distribution un
 
 Keep temperature at 1.0 (neutral) and use target for creativity control. If temperature adjustment is desired, keep it mild (0.9–1.1) and let Adaptive-P handle the primary distribution shaping.
 
-## 6.4 Interactions with Other Samplers
+## 5.4 Interactions with Other Samplers
 
 **Samplers that work well before Adaptive-P:**
 - Min-P: Recommended as complementary guardrail
@@ -87,15 +87,15 @@ Keep temperature at 1.0 (neutral) and use target for creativity control. If temp
 - Top-P: Works, but somewhat redundant with Adaptive-P's targeting
 - Temperature: Works if mild
 
-**Samplers that Adaptive-P makes unnecessary:**
+**Samplers that Adaptive-P may reduce the need for:**
 
-- **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. External repetition penalty becomes redundant.
+- **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. In many cases, this reduces or eliminates the need for external repetition penalty.
 
-- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) more reliably and without the fat-tail redistribution problem. Users who previously relied on XTC typically disable it when using Adaptive-P.
+- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) with finer control and without the fat-tail redistribution concern. Users who previously relied on XTC often find they can disable it when using Adaptive-P.
 
 - **Mirostat:** Both target perplexity/entropy, but through different mechanisms. Additionally, Mirostat also requires being the final sampler in the chain—they cannot coexist. Use one or the other.
 
-## 6.5 Implementation in llama.cpp
+## 5.5 Implementation in llama.cpp
 
 > [!NOTE]
 > Adaptive-P for llama.cpp is available via [PR #17927](https://github.com/ggml-org/llama.cpp/pull/17927). Check the PR status for merge progress.
@@ -118,7 +118,7 @@ Basic usage:
     -p "Once upon a time"
 ```
 
-## 6.6 Integration Challenges
+## 5.6 Integration Challenges
 
 **UI integration:**
 

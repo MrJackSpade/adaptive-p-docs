@@ -2,7 +2,6 @@
 
 ## Priority 1: Blocking Issues (Must fix before posting)
 
-- [ ] **Fix Section 4 numbering** — TOC jumps from Section 3 to Section 5
 - [ ] **Remove TODO marker in Abstract** — `<!-- TODO: Abstract length (~250 words...`
 - [ ] **Remove stale TODO comment in "Target 0 WITH Min-P" sample** — Comment left behind after content was generated
 - [ ] **Test or remove Python implementation** — Currently marked "has not been tested"
@@ -14,8 +13,6 @@
 - [ ] **Derive the 2.0 multiplier explicitly** — `calculated_target = 2.0 × configured_target − weighted_average` appears without mathematical justification
 - [ ] **Demonstrate or remove cross-model consistency claim** — Claimed multiple times, all samples from one model (GLM-4.5-Air-Q4_K_M)
 - [ ] **Add effective history window derivation** — Table gives "~10 tokens" for decay 0.9 without showing `1/(1-decay)`
-- [ ] **Soften "makes unnecessary" claims** — DRY/Repetition Penalty replacement asserted without comparative evidence
-- [ ] **Justify or soften Mirostat criticism** — "Fails with modern models" is strong; needs empirical backing or softening
 
 ---
 
@@ -31,11 +28,9 @@
 
 ## Priority 4: Presentation/Tone Issues (Medium risk)
 
-- [ ] **Decide on "slop" terminology** — Community jargon in academic-styled paper; either commit to informal or remove
-- [ ] **Reframe criticism of existing methods** — "None can say prefer 0.2 over 0.7" implies deficiency; reframe as different goals
 - [ ] **Specify XTC implementation being criticized** — "Uniform redistribution" may not apply to all variants
 - [ ] **Cite RLHF → sharper distributions claim** — Currently asserted without reference
-- [ ] **Address Section 7.6 speculation** — Stability benefit is "not fully understood"; consider moving to Future Work
+- [ ] **Address Section 6.6 speculation** — Stability benefit is "not fully understood"; consider moving to Future Work
 
 ---
 
@@ -49,12 +44,6 @@
 ---
 
 ## Working Notes
-
-### Section 4 Resolution
-Options:
-1. Renumber Section 5+ to 4+
-2. Insert missing Section 4 content (what was planned?)
-3. Add a Section 4 as transitional content
 
 ### Cross-Model Consistency
 Options:

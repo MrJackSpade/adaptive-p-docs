@@ -1,8 +1,8 @@
-# 5. Parameters
+# 4. Parameters
 
 Adaptive-P exposes two user-configurable parameters. This section details their effects, recommended ranges, and interaction with each other.
 
-## 5.1 Target
+## 4.1 Target
 
 **Range:** 0.0 to 1.0 (negative values disable the sampler)
 
@@ -48,7 +48,7 @@ Unlike temperature, which produces different effects depending on input distribu
 
 Users report that the target parameter feels intuitive once understood. "I want the model to pick tokens it's about 40% confident in" translates directly to target 0.4. This contrasts with temperature where "temperature 1.2" has no obvious semantic meaning.
 
-## 5.2 Decay
+## 4.2 Decay
 
 **Range:** 0.0 to 0.99
 
@@ -103,7 +103,7 @@ Although 0.9 works well for most cases, edge cases require adjustment:
 
 - **Elasticity:** The ideal decay provides enough elasticity to return toward target without overcorrecting. Like a spring—too stiff and it fights every movement; too loose and it oscillates wildly.
 
-## 5.3 Internal Constants
+## 4.3 Internal Constants
 
 The following values are fixed in the implementation and not user-configurable:
 
@@ -141,7 +141,7 @@ Early development considered exposing SHARPNESS as a parameter. The decision to 
 
 For advanced use cases, the constants can be modified in source.
 
-## 5.4 Disabling Adaptive-P
+## 4.4 Disabling Adaptive-P
 
 Setting target to a negative value (conventionally -1.0) disables the sampler entirely. In disabled mode, Adaptive-P:
 

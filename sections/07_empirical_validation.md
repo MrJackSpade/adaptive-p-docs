@@ -1,8 +1,8 @@
-# 7. Empirical Validation
+# 6. Empirical Validation
 
 This section presents empirical evidence that Adaptive-P achieves its design goals: successfully targeting specified probability ranges while maintaining output quality.
 
-## 7.1 Selection Distribution Analysis
+## 6.1 Selection Distribution Analysis
 
 The primary claim of Adaptive-P is that it targets specific probability ranges. We validate this by analyzing selection patterns over large generation runs.
 
@@ -36,7 +36,7 @@ The scatter plots reveal the real distribution patterns discussed in Section 3.2
 - Dense cluster at low probabilities: tail tokens that exist but are rarely selected
 - Green (selected) points tracking the grey target line when choices exist
 
-## 7.2 Target Achievement Over Time
+## 6.2 Target Achievement Over Time
 
 Beyond instantaneous selection patterns, we verify that the *average* selected probability converges to the configured target.
 
@@ -58,11 +58,11 @@ The following charts show calculated target over time at decay 0.5, 0.9, and 0.9
 </tr>
 </table>
 
-## 7.3 Contrast with Baseline Methods
+## 6.3 Contrast with Baseline Methods
 
 To demonstrate Adaptive-P's unique value, we compare selection patterns against baseline sampling methods on identical input distributions.
 
-### 7.3.1 Adaptive-P vs. Temperature
+### 6.3.1 Adaptive-P vs. Temperature
 
 **Setup:** Same generation run, comparing target 0.5 vs. temperature 1.0 (baseline) and temperature values tuned to match Adaptive-P's entropy.
 
@@ -74,7 +74,7 @@ Adaptive-P produces a curved selection rate that peaks near target. Mid-range to
 
 The temperature vs. Adaptive-P comparison charts in Section 2.1 demonstrate this contrast visually: temperature uniformly scales while Adaptive-P creates a distinct peak.
 
-## 7.4 Adaptation Dynamics
+## 6.4 Adaptation Dynamics
 
 We verify that the adaptive mechanism functions correctly—compensating for selection variance to maintain target average.
 
@@ -87,9 +87,9 @@ Track calculated target over generation. Observe response to selection patterns.
 - After low-probability selection: calculated target rises (compensate by targeting higher)
 - Over time: calculated target oscillates around configured target
 
-The decay comparison charts in Section 7.2 show this adaptation in action—decay 0.5 produces large oscillations (fishtailing), while decay 0.99 shows nearly flat targeting.
+The decay comparison charts in Section 6.2 show this adaptation in action—decay 0.5 produces large oscillations (fishtailing), while decay 0.99 shows nearly flat targeting.
 
-## 7.5 Initialization Validation
+## 6.5 Initialization Validation
 
 We verify that correct initialization prevents the warmup artifacts shown with naive initialization.
 
@@ -105,7 +105,7 @@ We verify that correct initialization prevents the warmup artifacts shown with n
 </tr>
 </table>
 
-## 7.6 Generation Stability Over Time
+## 6.6 Generation Stability Over Time
 
 > [!NOTE]
 > This phenomenon is observed empirically but not fully understood. The following is a working hypothesis based on testing and theoretical analysis.
