@@ -85,9 +85,9 @@ The stabilizing effect of min-p on low-target generations is best demonstrated t
 
 **Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
-**[Target 0 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
+**[Target 0.1 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
 
-**[Target 0 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
+**[Target 0.1 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
 
 ## 2.5 XTC (eXclude Top Choices)
 
@@ -98,19 +98,19 @@ XTC randomly removes high-probability tokens to force consideration of alternati
 2. Randomly exclude some portion of these top tokens
 3. Renormalize and sample from remaining candidates
 
-**The Critical Flaw: Uniform Redistribution**
+**Observed Limitation: Renormalization**
 
-When XTC removes top tokens, the probability mass must go somewhere. Standard implementations redistribute uniformly across all remaining tokens—including garbage tokens at the far tail.
+When XTC removes top tokens, the probability mass must go somewhere. Standard implementations renormalize across all remaining tokens—including garbage tokens at the far tail.
 
 This causes **fat tail accumulation**: removing a 0.6 probability token and redistributing to 1000 remaining tokens gives each an extra 0.0006. But those 1000 tail tokens, collectively, now have significant mass. The probability of selecting a low-quality token increases substantially.
 
-The problem compounds because XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the garbage tail.
+This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the garbage tail.
 
 **Practical Issues:**
 
-Users report that XTC produces unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—garbage tokens were selected due to accumulated tail probability.
+XTC can produce unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—garbage tokens were selected due to accumulated tail probability.
 
-The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Users describe "never knowing what you were going to get."
+The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Some users describe "never knowing what you were going to get."
 
 <table>
 <tr>
@@ -128,11 +128,11 @@ Mirostat was the original inspiration for Adaptive-P. It targets a specific perp
 2. If perplexity is below target, increase K (allow more options)
 3. If perplexity is above target, decrease K (restrict options)
 
-**Observed Limitations with Modern Models:**
+**Observed Behavior with Modern Models:**
 
-Mirostat was designed when model probability distributions were broader. A Top-K adjustment from 50 to 100 meaningfully changed the candidate pool.
+Mirostat was designed when model probability distributions tended to be broader. A Top-K adjustment from 50 to 100 meaningfully changed the candidate pool.
 
-Modern models, especially those trained with RLHF, produce much sharper distributions. The top 2-3 tokens often hold 90%+ of the probability mass. Adjusting Top-K from 50 to 100,000 often selects the same tokens because nothing else has meaningful probability.
+In our testing, modern models—especially those trained with RLHF—often produce sharper distributions. The top 2-3 tokens often hold 90%+ of the probability mass. Adjusting Top-K from 50 to 100,000 often selects the same tokens because nothing else has meaningful probability.
 
 The samples in this paper illustrate this reality: most token selections have only 2-5 viable candidates after min-p filtering. Top-K adjustment cannot create variety that doesn't exist in the distribution.
 
@@ -161,13 +161,13 @@ Real token distributions after min-p rarely resemble smooth curves. They typical
 
 Adaptive-P's transformation handles each case appropriately. The unbounded negative logits prevent clustered low tokens from accumulating probability. The quadratic core provides fine differentiation among close competitors.
 
-**Why uniform redistribution fails (the XTC problem):**
+**Why renormalization fails (the XTC problem):**
 
-When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With uniform redistribution across 100 remaining tokens:
+When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With renormalization across 100 remaining tokens:
 - Each gets +0.006 added probability
 - A garbage token that was 0.001 becomes 0.007—a 7× increase
 - The combined tail of 90 garbage tokens goes from ~0.05 total to ~0.60 total
 
 This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get garbage as to get a coherent alternative. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
 
-The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC boosts all tail tokens uniformly, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.
+The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC's renormalization boosts all tail tokens proportionally, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.

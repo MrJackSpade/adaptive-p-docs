@@ -6,11 +6,6 @@
 
 ---
 
-<!-- TODO: Generate sample output
-  Run with target 0 AND min-p 0.05 to demonstrate coherent but creative output
-  when min-p removes garbage tokens before Adaptive-P selects.
--->
-
 Barney wasn’t just a terrier with scruffy ears; Barney was a walking, balking contradiction. Every morning, as he munched on kibble in Mrs. Henderson’s kitchen, he’d narrate his inner thoughts in surprisingly clear, human cadences, lamenting the crunchiness or questioning the flavor choices. “Honestly,” he’d mutter one sunny morning, peering out the back window where the neighborhood squirrel chattered, “Silly little critters, running about chattering away like that. Probably dreaming up trouble, just making noises.” Barney could hold lengthy discussions with his boy, Leo, about everything from the indignity of bath-time to the injustice of shared pizza toppings lacking crusts. Yet, if any other animal – from Mrs. Henderson’s Siamese, Percy, who occasionally meowed sharp questions at the mail slot, to Leo’s pet budgie, Pip, who warbled nonsensical dittles – seemed capable of articulate sound, Barney would simply snort, flicking his tail. “That’s not talking, that’s just... well, barking and meowing! Proper communication? Humans talking to me, now *that’s* the civilized world.” The concept that other creatures possessed anything close to his unique skill, the very essence of his special status in his own eyes, was utterly laughable. It wasn't ignorance; it was a fervently maintained delusion.
 
 Leo found his dog's hypocrisy both adorable and bewildering. One afternoon, Pip landed on the windowsill outside where Barney lay, beady head tilted. Pip’s complex whistled song seemed, to Barney, an insult to conversational integrity. “Pipe down, you feathery annoyance,” Barney growled, without opening his eyes. Leo couldn't help himself: “He sounds almost annoyed at us, doesn’t he?” Barney snapped one open. “Don’t be ridiculous, Leo! It’s a bird! All they do is flap wings and squawk. Talking is about expressing complex thoughts and needs. Birds have neither!” Leo would just smile, ruffling Barney’s fur, marveling that his best friend couldn't connect his own ability with anything resembling an animal instinct.

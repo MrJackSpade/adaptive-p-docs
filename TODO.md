@@ -1,63 +1,90 @@
 # TODO.md - Adaptive-P Documentation Fixes
 
-## Priority 1: Blocking Issues (Must fix before posting)
+## Critical (Fix Before Publishing)
 
-- [ ] **Remove TODO marker in Abstract** — `<!-- TODO: Abstract length (~250 words...`
-- [ ] **Remove stale TODO comment in "Target 0 WITH Min-P" sample** — Comment left behind after content was generated
-- [ ] **Test or remove Python implementation** — Currently marked "has not been tested"
+- [ ] Fix duplicate Section 4 numbering (Design Rationale and Parameters both labeled Section 4)
+- [ ] Renumber all sections to match Table of Contents (should be 1-9)
+- [ ] Complete "Target 0 WITH Min-P" sample (currently contains TODO placeholder)
+- [ ] Fix compilation date "2026-01-01" (typo or future-dating)
+- [ ] Reconcile "Target 0" header vs `--adaptive-target 0.1` in settings block for no-minp sample
 
----
+## Empirical Validation
 
-## Priority 2: Unsupported Claims (High risk of criticism)
+- [ ] Add perplexity measurements comparing Adaptive-P at different targets vs baseline
+- [ ] Add MAUVE or other distribution-level metric comparison
+- [ ] Consider human preference evaluation (even informal A/B)
+- [ ] Add scatter plots for temperature sampling as baseline comparison
+- [ ] Add scatter plots for top-p sampling as baseline comparison
+- [ ] Document at least one failure case / bad output example
+- [ ] Add ablation study: adaptive targeting vs static targeting (show the "fishtailing")
+- [ ] Test and include samples from Llama-3 or Llama-3.1
+- [ ] Test and include samples from Qwen
+- [ ] Test and include samples from Phi
+- [ ] Test and include samples from Gemma
+- [ ] Diversify sample prompts beyond horror stories
 
-- [ ] **Derive the 2.0 multiplier explicitly** — `calculated_target = 2.0 × configured_target − weighted_average` appears without mathematical justification
-- [ ] **Demonstrate or remove cross-model consistency claim** — Claimed multiple times, all samples from one model (GLM-4.5-Air-Q4_K_M)
-- [ ] **Add effective history window derivation** — Table gives "~10 tokens" for decay 0.9 without showing `1/(1-decay)`
+## Technical Claims Requiring Evidence
 
----
+- [ ] Add citation or experimental data for XTC "fat tail accumulation" claim
+- [ ] Add citation or data for "modern models produce sharper distributions" (Mirostat section)
+- [ ] Soften XTC critique language to "our observations suggest" if no hard data available
+- [ ] Soften Mirostat critique language to "our observations suggest" if no hard data available
+- [ ] Add experimental comparison: Adaptive-P vs XTC on same prompts
+- [ ] Add experimental comparison: Adaptive-P vs Mirostat on same prompts
+- [ ] Justify the 94%→50% transform behavior more thoroughly (why is this desirable?)
+- [ ] Document sensitivity analysis for magic constants (PEAK, SHARPNESS, WIDTH)
+- [ ] Fix 2× multiplier derivation to properly address exponential weighting (not just simple average)
 
-## Priority 3: Methodological Gaps (Will be questioned)
+## Missing Technical Content
 
-- [ ] **Specify experimental methodology** — "25,000+ tokens across varied prompts" needs: which models, which prompts, how many runs, prompt diversity
-- [ ] **Add samples from different model** — All samples currently from GLM-4.5-Air-Q4_K_M
-- [ ] **Justify transformation function choice** — Why `dist² / (1 + dist)` vs Gaussian or other forms?
-- [ ] **Justify magic constants** — PEAK=5.0, SHARPNESS=10.0, WIDTH=0.2 are "empirically tuned" without detail
-- [ ] **Add ablation studies or acknowledge absence** — What if adaptive component removed? Different transformation?
+- [ ] Add computational overhead / performance benchmarks (tokens/sec impact)
+- [ ] Document batch inference implications
+- [ ] Document interaction with speculative decoding
+- [ ] Document interaction with beam search
+- [ ] Explain mathematically why extreme temperature (T<0.5, T>1.5) causes problems
+- [ ] Add failure mode documentation (what prompts/distributions break it?)
+- [ ] Document edge case: what happens when all tokens are far from target?
+- [ ] Document edge case: what happens with very long context?
 
----
+## Structural & Presentation
 
-## Priority 4: Presentation/Tone Issues (Medium risk)
+- [ ] Add "Limitations" callout box early in document (Section 1 or 2), not just conclusions
+- [ ] Move "destructive transformation" from note box to main text (it's fundamental)
+- [ ] Make "must be last in chain" constraint more prominent
+- [ ] Make Mirostat mutual exclusivity more prominent
+- [ ] Trim abstract to 150-250 words per arxiv conventions (noted in existing TODO)
+- [ ] Add XTC to References section (currently uncited)
+- [ ] Expand References beyond 6 citations if positioning as academic paper
 
-- [ ] **Specify XTC implementation being criticized** — "Uniform redistribution" may not apply to all variants
-- [ ] **Cite RLHF → sharper distributions claim** — Currently asserted without reference
-- [ ] **Address Section 6.6 speculation** — Stability benefit is "not fully understood"; consider moving to Future Work
+## Terminology & Tone
 
----
+- [ ] Decide on audience: academic paper vs community documentation
+- [ ] If academic: remove "slop" or define it formally
+- [ ] If academic: reconsider "novel" claim in abstract (probability-distance weighting isn't new)
+- [ ] If community: consider relaxing academic framing
+- [ ] Review all claims for overclaiming (novel, consistent, etc.)
 
-## Priority 5: Nice-to-Have Improvements (Lower risk)
+## Code & Implementation
 
-- [ ] **Add standard NLG metrics** — No perplexity, MAUVE, or human evaluation
-- [ ] **Expand references** — Only 6, no engagement with broader sampling literature
-- [ ] **Acknowledge quick brown fox example is simplified** — Most high-confidence chains are subtler
-- [ ] **Statistical significance testing** — No controlled comparisons with baselines
+- [ ] Test Python reference implementation (currently marked "not tested")
+- [ ] Add tested Python implementation or remove the warning
+- [ ] Document llama.cpp PR status more specifically (merge timeline if known)
+- [ ] Add vLLM integration example
+- [ ] Add Hugging Face LogitsProcessor example
 
----
+## Samples
 
-## Working Notes
+- [ ] Generate missing "Target 0 WITH Min-P" sample
+- [ ] Add samples from non-GLM models
+- [ ] Add at least one non-horror-story prompt
+- [ ] Add a "bad output" sample showing failure mode
+- [ ] Add sample showing fishtailing with low decay
+- [ ] Add sample showing stubbornness with high decay
 
-### Cross-Model Consistency
-Options:
-1. Run samples on Llama, Mistral, etc. with same prompts/settings
-2. Remove/soften all cross-model claims (appears in: Abstract, 1.3, 5.1)
-3. Reframe as "observed in testing" without strong generalization
+## Nice to Have
 
-### 2.0 Multiplier Derivation
-The formula comes from: wanting `E[selected_prob] = target`
-If historical average is `avg`, and we want the new selection to pull toward target:
-- New selection ≈ calculated_target (on average)
-- New average ≈ (calculated_target + avg) / 2 (simplified)
-- Want new average = target
-- So: (calculated_target + avg) / 2 = target
-- Therefore: calculated_target = 2*target - avg
-
-(This is the intuition; actual derivation involves the weighted EMA)
+- [ ] Add interactive demo or notebook
+- [ ] Create simplified "quick start" section for practitioners
+- [ ] Add FAQ section addressing anticipated criticisms
+- [ ] Add troubleshooting section
+- [ ] Consider splitting into "paper" and "documentation" versions

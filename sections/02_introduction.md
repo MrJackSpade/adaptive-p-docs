@@ -4,7 +4,7 @@
 
 Modern large language models produce remarkably fluent text, but this fluency often comes at the cost of creativity and variety. The underlying issue is what we term "high-confidence token chains"—sequences where each token's selection reinforces the next high-probability choice, creating a self-perpetuating cycle of predictable output.
 
-Consider a model continuing the phrase "The quick brown fox..." The most probable next token is almost certainly "jumps." Once "jumps" is selected, "over" becomes extremely likely. Then "the," then "lazy," then "dog." The model has locked onto a memorized sequence, and nothing in standard sampling breaks this chain.
+Consider a model continuing "The detective examined the..." The most probable next token is likely "evidence," "body," or "scene." Once "scene" is selected, "of the crime" becomes extremely likely. The model locks onto familiar narrative grooves, and nothing in standard sampling breaks this chain.
 
 This behavior manifests in practical terms as:
 - **Repetitive phrasing**: The same sentence structures and word choices appearing across generations
@@ -46,3 +46,6 @@ This creates several desirable properties:
 3. **Chain breaking**: High-confidence chains are disrupted because the sampler actively resists selecting 0.9+ probability tokens repeatedly. The first high-confidence token in a potential chain shifts the target downward, making alternatives more attractive for subsequent tokens.
 
 4. **Consistent behavior**: Unlike temperature (where the effect depends heavily on the input distribution's shape), the same target parameter produces similar selection patterns across different models and contexts.
+
+[!NOTE]
+Intended Use Case: Adaptive-P is designed for creative text generation—fiction, roleplay, brainstorming—where predictability is undesirable. It is not intended for factual Q&A, summarization, or tasks where accuracy matters more than variety. Evaluation metrics throughout this paper reflect this scope: we measure whether the sampler hits its probability targets, not whether output matches predictable references.

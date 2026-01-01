@@ -16,24 +16,27 @@ Summary of Adaptive-P's probability-targeting approach, key contributions, and e
 The high-confidence token chain problem, why temperature and truncation don't solve it, and how Adaptive-P's targeting approach differs.
 
 ### [2. Related Work](sections/03_related_work.md)
-Comparison with Temperature, Top-K, Top-P, Min-P, XTC, and Mirostat. Why uniform redistribution fails and how selective redistribution works.
+Comparison with Temperature, Top-K, Top-P, Min-P, XTC, and Mirostat. Why renormalization fails and how selective redistribution works.
 
 ### [3. The Algorithm](sections/04_algorithm.md)
 Core probability targeting, real distribution patterns (forced choice, binary split, clustered tail), configured vs. calculated target, the logit transformation function, and why unbounded negative logits matter.
 
-### [5. Parameters](sections/05_parameters.md)
+### [4. Design Justification](sections/05_design_justification.md)
+Why the logit transformation function was selected, empirical tuning of constants, and design tradeoffs.
+
+### [5. Parameters](sections/06_parameters.md)
 `target` (0.0–1.0), `decay` (0.0–0.99), internal constants. Includes elasticity/stubbornness/fishtailing behavior and why SHARPNESS isn't user-configurable.
 
-### [6. Integration](sections/06_integration.md)
+### [6. Integration](sections/07_integration.md)
 Chain positioning (must be last), Min-P complementarity, temperature interaction, samplers made unnecessary. Includes llama.cpp usage examples.
 
-### [7. Empirical Validation](sections/07_empirical_validation.md)
+### [7. Empirical Validation](sections/08_empirical_validation.md)
 Selection distribution analysis, target achievement, comparisons with temperature, adaptation dynamics, initialization validation, cross-model consistency.
 
-### [8. Implementation Reference](sections/08_implementation.md)
+### [8. Implementation Reference](sections/09_implementation.md)
 Complete annotated C++ implementation, Python pseudocode, data structures, and porting notes.
 
-### [9. Conclusion](sections/09_conclusion.md)
+### [9. Conclusion](sections/10_conclusion.md)
 Summary of contributions, limitations, and future work directions.
 
 ---

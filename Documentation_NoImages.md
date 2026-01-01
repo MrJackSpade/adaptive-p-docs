@@ -1,6 +1,6 @@
 ﻿# Adaptive-P Sampler - Complete Documentation
 
-> **Compiled on 2026-01-01 12:35:48**
+> **Compiled on 2026-01-01 15:03:29**
 >
 > This is a text-only version of the Adaptive-P documentation with images stubbed out. Sample files are included inline. For the full version with embedded images, use compile_docs.bat.
 
@@ -12,6 +12,7 @@
 - [1. Introduction](#1-introduction)
 - [2. Related Work and Comparative Analysis](#2-related-work-and-comparative-analysis)
 - [3. The Adaptive-P Algorithm](#3-the-adaptive-p-algorithm)
+- [4. Design Justification](#4-design-justification)
 - [5. Parameters](#5-parameters)
 - [6. Integration and Sampler Chain](#6-integration-and-sampler-chain)
 - [7. Empirical Validation](#7-empirical-validation)
@@ -23,23 +24,17 @@
 
 # Abstract
 
-We present Adaptive-P, a novel sampling method for autoregressive language models that targets a specific probability range rather than truncating or uniformly scaling the token distribution. Unlike temperature sampling (which affects all tokens equally) or truncation methods like top-p and min-p (which make binary include/exclude decisions), Adaptive-P applies a continuous transformation that preferentially selects tokens near a user-specified target probability.
+We present Adaptive-P, an alternative sampling method for autoregressive language models that targets a specific probability range rather than truncating or uniformly scaling the token distribution. Unlike temperature sampling (which affects all tokens equally) or truncation methods like top-p and min-p (which make binary include/exclude decisions), Adaptive-P applies a continuous transformation that preferentially selects tokens near a user-specified target probability.
 
-The method maintains a weighted moving average of previously selected token probabilities and dynamically adjusts its targeting to achieve this average over time. When recent selections skew toward high-probability tokens, the sampler compensates by targeting lower probabilities on subsequent steps, and vice versa. This adaptive behavior breaks the high-confidence token chains that produce repetitive, generic output—a phenomenon often termed "slop" in the LLM community.
+The method maintains a weighted moving average of previously selected token probabilities and dynamically adjusts its targeting to achieve this average over time. When recent selections skew toward high-probability tokens, the sampler compensates by targeting lower probabilities on subsequent steps, and vice versa. This adaptive behavior breaks the high-confidence token chains that produce repetitive, generic output—a phenomenon practitioners often call "slop".
 
-Key contributions include:
+This document presents:
 - A probability-targeting paradigm as an alternative to truncation-based sampling
 - An unbounded quadratic transformation that handles sparse, clustered real-world token distributions without probability pile-up
 - Adaptive adjustment that prevents both monotony (always selecting high-probability tokens) and chaos (random low-quality selections)
 - Clean integration with existing sampler chains, complementing min-p as a guardrail
 
-Empirical evaluation across multiple models demonstrates that Adaptive-P successfully targets user-specified probability ranges while maintaining output coherence. The same target parameter produces consistent behavior across different model architectures, making it a practical tool for controlling the creativity-coherence tradeoff in text generation.
-
-<!-- TODO: Abstract length (~250 words, arxiv typically wants 150-250)
-  @claude: May need trimming after full paper is drafted.
-  @loxifi: 
--->
-
+Empirical evaluation across multiple models demonstrates that Adaptive-P successfully targets user-specified probability ranges while maintaining output coherence. In testing, in preliminary testing, the same target parameter produced similar selection patterns across tested models (GLM-4.x, Mistral, Cydonia), making it a practical tool for controlling the creativity-coherence tradeoff in text generation. The method is intended for creative applications where output diversity is valued over predictability; standard likelihood-based metrics are not applicable.
 
 ---
 
@@ -49,13 +44,13 @@ Empirical evaluation across multiple models demonstrates that Adaptive-P success
 
 Modern large language models produce remarkably fluent text, but this fluency often comes at the cost of creativity and variety. The underlying issue is what we term "high-confidence token chains"—sequences where each token's selection reinforces the next high-probability choice, creating a self-perpetuating cycle of predictable output.
 
-Consider a model continuing the phrase "The quick brown fox..." The most probable next token is almost certainly "jumps." Once "jumps" is selected, "over" becomes extremely likely. Then "the," then "lazy," then "dog." The model has locked onto a memorized sequence, and nothing in standard sampling breaks this chain.
+Consider a model continuing "The detective examined the..." The most probable next token is likely "evidence," "body," or "scene." Once "scene" is selected, "of the crime" becomes extremely likely. The model locks onto familiar narrative grooves, and nothing in standard sampling breaks this chain.
 
 This behavior manifests in practical terms as:
 - **Repetitive phrasing**: The same sentence structures and word choices appearing across generations
 - **Generic descriptions**: "The room was dimly lit" instead of more specific, evocative language  
 - **Predictable narratives**: Story beats following the most common patterns from training data
-- **Slop**: The community term for output that feels AI-generated—technically correct but lacking authentic voice
+- **Formulaic output**: Text that feels AI-generated—technically correct but lacking authentic voice (sometimes called "slop" in practitioner communities)
 
 The root cause isn't the model's knowledge—modern LLMs encode vast linguistic diversity. The problem is that standard sampling methods don't provide a mechanism to *access* that diversity in a controlled way.
 
@@ -74,7 +69,7 @@ Neither approach asks the question we actually want to answer: "Can we preferent
 - **Top-P 0.9:** Keeps all three (cumulative 1.0 > 0.9). No preference within the set—the 0.7 token is still selected 70% of the time.
 - **Min-P 0.15:** Keeps the 0.7 and 0.2 tokens. Again, no preference—just truncation.
 
-None of these methods can say "prefer the 0.2 token over the 0.7 token."
+These methods are designed for different goals—none are intended to express preferences like "prefer the 0.2 token over the 0.7 token."
 
 ## 1.3 The Adaptive-P Solution
 
@@ -91,6 +86,9 @@ This creates several desirable properties:
 3. **Chain breaking**: High-confidence chains are disrupted because the sampler actively resists selecting 0.9+ probability tokens repeatedly. The first high-confidence token in a potential chain shifts the target downward, making alternatives more attractive for subsequent tokens.
 
 4. **Consistent behavior**: Unlike temperature (where the effect depends heavily on the input distribution's shape), the same target parameter produces similar selection patterns across different models and contexts.
+
+[!NOTE]
+Intended Use Case: Adaptive-P is designed for creative text generation—fiction, roleplay, brainstorming—where predictability is undesirable. It is not intended for factual Q&A, summarization, or tasks where accuracy matters more than variety. Evaluation metrics throughout this paper reflect this scope: we measure whether the sampler hits its probability targets, not whether output matches predictable references.
 
 ---
 
@@ -181,9 +179,9 @@ The stabilizing effect of min-p on low-target generations is best demonstrated t
 
 **Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
-**[Target 0 WITHOUT Min-P](#sample-target-0-no-minp)** — Chaotic, incoherent output as garbage tokens are selected
+**[Target 0.1 WITHOUT Min-P](#sample-target-0-no-minp)** — Chaotic, incoherent output as garbage tokens are selected
 
-**[Target 0 WITH Min-P 0.05](#sample-target-0-with-minp)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
+**[Target 0.1 WITH Min-P 0.05](#sample-target-0-with-minp)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
 
 ## 2.5 XTC (eXclude Top Choices)
 
@@ -194,19 +192,19 @@ XTC randomly removes high-probability tokens to force consideration of alternati
 2. Randomly exclude some portion of these top tokens
 3. Renormalize and sample from remaining candidates
 
-**The Critical Flaw: Uniform Redistribution**
+**Observed Limitation: Renormalization**
 
-When XTC removes top tokens, the probability mass must go somewhere. Standard implementations redistribute uniformly across all remaining tokens—including garbage tokens at the far tail.
+When XTC removes top tokens, the probability mass must go somewhere. Standard implementations renormalize across all remaining tokens—including garbage tokens at the far tail.
 
 This causes **fat tail accumulation**: removing a 0.6 probability token and redistributing to 1000 remaining tokens gives each an extra 0.0006. But those 1000 tail tokens, collectively, now have significant mass. The probability of selecting a low-quality token increases substantially.
 
-The problem compounds because XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the garbage tail.
+This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the garbage tail.
 
 **Practical Issues:**
 
-Users report that XTC produces unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—garbage tokens were selected due to accumulated tail probability.
+XTC can produce unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—garbage tokens were selected due to accumulated tail probability.
 
-The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Users describe "never knowing what you were going to get."
+The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Some users describe "never knowing what you were going to get."
 
 <table>
 <tr>
@@ -224,11 +222,11 @@ Mirostat was the original inspiration for Adaptive-P. It targets a specific perp
 2. If perplexity is below target, increase K (allow more options)
 3. If perplexity is above target, decrease K (restrict options)
 
-**Why It Fails with Modern Models:**
+**Observed Behavior with Modern Models:**
 
-Mirostat was designed when model probability distributions were broader. A Top-K adjustment from 50 to 100 meaningfully changed the candidate pool.
+Mirostat was designed when model probability distributions tended to be broader. A Top-K adjustment from 50 to 100 meaningfully changed the candidate pool.
 
-Modern models, especially those trained with RLHF, produce much sharper distributions. The top 2-3 tokens often hold 90%+ of the probability mass. Adjusting Top-K from 50 to 100,000 often selects the same tokens because nothing else has meaningful probability.
+In our testing, modern models—especially those trained with RLHF—often produce sharper distributions. The top 2-3 tokens often hold 90%+ of the probability mass. Adjusting Top-K from 50 to 100,000 often selects the same tokens because nothing else has meaningful probability.
 
 The samples in this paper illustrate this reality: most token selections have only 2-5 viable candidates after min-p filtering. Top-K adjustment cannot create variety that doesn't exist in the distribution.
 
@@ -257,16 +255,16 @@ Real token distributions after min-p rarely resemble smooth curves. They typical
 
 Adaptive-P's transformation handles each case appropriately. The unbounded negative logits prevent clustered low tokens from accumulating probability. The quadratic core provides fine differentiation among close competitors.
 
-**Why uniform redistribution fails (the XTC problem):**
+**Why renormalization fails (the XTC problem):**
 
-When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With uniform redistribution across 100 remaining tokens:
+When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With renormalization across 100 remaining tokens:
 - Each gets +0.006 added probability
 - A garbage token that was 0.001 becomes 0.007—a 7× increase
 - The combined tail of 90 garbage tokens goes from ~0.05 total to ~0.60 total
 
 This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get garbage as to get a coherent alternative. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
 
-The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC boosts all tail tokens uniformly, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.
+The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC's renormalization boosts all tail tokens proportionally, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.
 
 
 ---
@@ -366,7 +364,7 @@ calculated_target = 2.0 × configured_target − weighted_average
 
 **Intuition:** If recent selections averaged 0.6 probability but the user wants 0.5, the calculated target drops to 0.4 to compensate. The algorithm "aims past" the configured target to pull the average back toward it.
 
-**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average. See Section 7.2 for charts showing this behavior at different decay values.
+**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average. See Section 6.2 for charts showing this behavior at different decay values.
 
 The calculated target is clamped to [0.0, 1.0] before use. Extreme historical selections can push the raw calculated value outside this range, but the clamping ensures the transformation remains well-defined.
 
@@ -435,7 +433,7 @@ The practical difference:
 
 This is the "selective redistribution" property. Probability doesn't flow uniformly to all candidates—it concentrates on those closest to target.
 
-The XTC comparison charts in Section 2.5 illustrate this directly: XTC's uniform redistribution boosts all tail tokens (green lines up), while Adaptive-P concentrates probability on near-target tokens and suppresses the tail (red lines down).
+The XTC comparison charts in Section 2.5 illustrate this directly: XTC's renormalization boosts all tail tokens proportionally (green lines up), while Adaptive-P concentrates probability on near-target tokens and suppresses the tail (red lines down).
 
 ## 3.6 Softmax Normalization
 
@@ -508,6 +506,178 @@ This primes the history as if infinitely many tokens at the target probability h
 
 ---
 
+# 4. Design Rationale
+
+This section explains why Adaptive-P uses its specific formulas and constants. Understanding these choices helps users predict behavior in edge cases and enables implementers to make informed modifications.
+
+## 4.1 The Adaptive Target Formula
+
+The core adaptive mechanism uses:
+
+```
+calculated_target = 2.0 × configured_target − weighted_average
+```
+
+**Why the 2.0 multiplier?**
+
+The goal is for the *average* selected probability to converge to the configured target over time. If recent selections have averaged above target, we need to aim below target to compensate—and vice versa.
+
+Consider the simplest case: if the next selection lands exactly at `calculated_target`, and we want the new average to equal `configured_target`:
+
+```
+(calculated_target + weighted_average) / 2 = configured_target
+```
+
+Solving for `calculated_target`:
+
+```
+calculated_target = 2 × configured_target − weighted_average
+```
+
+The actual implementation uses an exponentially-weighted moving average rather than a simple average, but the same principle applies. The 2.0 multiplier creates a control loop where overshooting in one direction produces proportional correction in the other.
+
+**Boundary behavior:**
+
+The calculated target is clamped to [0.0, 1.0] after computation. Without clamping, extreme historical averages could push the calculated target outside the valid probability range. For example, if `configured_target = 0.3` and `weighted_average = 0.8`, the raw calculated target would be `2(0.3) - 0.8 = -0.2`, which is clamped to 0.0.
+
+## 4.2 The Transformation Function
+
+The transformation converts probability-to-target distance into logits:
+
+```
+logit = PEAK − SHARPNESS × dist² / (1 + dist)
+```
+
+This specific form was selected after evaluating alternatives that failed in characteristic ways.
+
+### Alternative 1: Lorentzian (Power Law)
+
+```
+logit = peak / (1 + dist²)
+```
+
+**Failure mode: Artificial floor**
+
+The Lorentzian has a minimum value approaching zero but never reaching it. With typical constants, the minimum achievable logit is approximately 0.4, regardless of how far a token lies from target.
+
+After softmax over 100 candidates, this floor means each garbage token retains ~1% probability. Collectively, distant tokens accumulate significant selection probability despite being semantically inappropriate. This is the same "fat tail" problem that affects XTC.
+
+### Alternative 2: Gaussian
+
+```
+logit = peak × exp(−dist²)
+```
+
+**Failure mode: Cliff effect**
+
+The Gaussian suppresses distant tokens effectively—too effectively. It creates a "cliff" where all tokens beyond a certain distance receive near-identical (negligible) logits.
+
+When the target is 0.5 but only tokens at 0.1 and 0.2 probability are available, both are far from target. The Gaussian assigns them nearly equal selection probability despite 0.2 being objectively closer. The sampler loses the ability to express graduated preference among off-target candidates.
+
+### Final Design: Adaptive Unbounded Quadratic
+
+```
+logit = PEAK − SHARPNESS × dist² / (1 + dist)
+```
+
+This function interpolates between two regimes:
+
+**Near target (dist → 0):** The denominator approaches 1, yielding `PEAK − SHARPNESS × dist²`. Quadratic behavior preserves fine-grained differentiation among tokens close to target, similar to Gaussian.
+
+**Far from target (dist → ∞):** The expression simplifies to approximately `PEAK − SHARPNESS × dist`. Linear decay ensures:
+- Unbounded negative logits (no artificial floor)
+- Proper suppression after softmax (each additional unit of distance costs another order of magnitude in probability)
+- Maintained relative ordering (a token at distance 2 remains more probable than one at distance 3, even when both are far from target)
+
+**Smooth transition:** The `(1 + dist)` denominator provides continuous interpolation without discontinuities or kinks.
+
+## 4.3 Constant Selection
+
+The three internal constants were empirically tuned across multiple models. This section documents the rationale and known limitations.
+
+### PEAK_LOGIT_VALUE = 5.0
+
+The peak value determines the maximum logit for tokens exactly at target. After softmax, this establishes probability ratios between on-target and off-target tokens.
+
+At `PEAK = 5.0`, a token at target receives `exp(5.0) ≈ 148×` the probability weight of a token at logit 0. This provides strong differentiation without numerical instability.
+
+- Lower values (e.g., 3.0) reduce differentiation, making the sampler less effective at targeting
+- Higher values (e.g., 10.0) risk over-concentration on single tokens and potential overflow issues
+
+### SHARPNESS = 10.0
+
+Sharpness controls how quickly logits decay as tokens deviate from target. Higher values produce more aggressive suppression of off-target tokens.
+
+The value 10.0 was selected to balance two failure modes:
+- **Too low (e.g., 4.0):** Insufficient suppression of garbage tokens when min-p filtering is relaxed
+- **Too high (e.g., 20.0):** Over-sensitivity to small probability differences, reducing effective candidate diversity
+
+Sharpness interacts with the decay parameter: higher sharpness amplifies the effect of target adjustments, making low-decay configurations more volatile.
+
+These values were tuned visually against sample candidate pool distributions—calibrated to produce reasonable drift among top candidates while preventing probability pile-up in the tail. They perform well across tested models but could likely be improved through systematic optimization.
+
+### DISTRIBUTION_WIDTH = 0.2 (INV_WIDTH = 5.0)
+
+Width normalizes the distance metric, defining what "near" and "far" mean in probability space.
+
+With `WIDTH = 0.2`:
+- A token 0.2 probability units from target has `dist = 1.0` (one "standard width")
+- A token 0.4 probability units from target has `dist = 2.0`
+
+This scaling produces intuitive relationships between target values and selection behavior. A target of 0.5 creates a preference band roughly spanning 0.3–0.7, with tokens outside this range progressively suppressed.
+
+### Limitations of Constant Tuning
+
+These constants were determined through iterative testing rather than systematic optimization:
+
+- No grid search or formal hyperparameter tuning was conducted
+- Testing concentrated on specific model families (GLM-4.x, Mistral, Cydonia)
+- Interaction effects between constants were not formally characterized
+
+The values work well across tested configurations but may benefit from adjustment for specific model architectures or use cases. The constants are defined as preprocessor macros to facilitate experimentation.
+
+## 4.4 History Initialization
+
+The weighted moving average requires careful initialization to avoid transient artifacts.
+
+**The problem with naive initialization:**
+
+Starting with `weighted_sum = 0` and `total_weight = 0` creates a degenerate first step. The code handles the 0/0 case by using configured target directly, but subsequent steps exhibit a characteristic "crash and recovery" pattern:
+
+1. First selection (say, probability 0.8) enters an empty history
+2. Weighted average immediately becomes 0.8
+3. Calculated target swings to `2(0.5) - 0.8 = 0.2`
+4. System spends many tokens recovering to equilibrium
+
+**The correct initialization:**
+
+Initialize as if the target had already been achieved at equilibrium:
+
+```
+weighted_sum = target / (1 − decay)
+total_weight = 1 / (1 − decay)
+```
+
+**Derivation:** At equilibrium, the weighted average equals the target. For an exponentially-weighted sum with decay factor `d`, the sum of weights is the geometric series `1 + d + d² + ... = 1/(1-d)`. If every term in the weighted sum equals `target`, then `weighted_sum = target × 1/(1-d) = target/(1-d)`.
+
+This initialization makes the first token behave identically to the hundredth token—no warmup period, no transient artifacts.
+
+## 4.5 What Was Not Formally Tested
+
+Transparency about evaluation limitations:
+
+**No standard NLG metrics:** Evaluations used qualitative assessment ("does this read well?") rather than perplexity, MAUVE scores, or human preference ratings.
+
+**No factorial design:** Interactions between target × decay × min-p × model architecture were not systematically characterized.
+
+**Limited model coverage:** Limited model coverage: Most testing and all documentation samples used GLM-4.x. Qualitative testing on Mistral and Cydonia showed similar target-hitting behavior, but systematic cross-architecture comparison was not conducted. The "cross-model consistency" claim is based on observed selection patterns, not rigorous benchmarking.
+
+**No ablation of adaptive component:** Direct quantitative comparison between static targeting (decay = 0) and adaptive targeting was not formally documented, though qualitative testing indicated static targeting produces oscillatory "fishtailing" behavior.
+
+Community testing provided extensive qualitative feedback that informed the design, but this paper does not claim rigorous empirical validation by academic standards.
+
+---
+
 # 5. Parameters
 
 Adaptive-P exposes two user-configurable parameters. This section details their effects, recommended ranges, and interaction with each other.
@@ -551,7 +721,7 @@ Notice how target 0.3 produces unusual imagery ("icy slurry"), while 0.9 gravita
 
 **Key property: Cross-model consistency**
 
-Unlike temperature, which produces different effects depending on input distribution shape, target behaves consistently across models. Target 0.5 on Llama produces similar *selection patterns* to target 0.5 on Mistral, even though the underlying token distributions differ.
+Unlike temperature, which produces different effects depending on input distribution shape, preliminary testing suggests target produces similar selection patterns across architectures—though systematic cross-model comparison was not conducted (see Section 4.5).
 
 
 **Intuition for parameter tuning:**
@@ -576,6 +746,8 @@ The decay value can be interpreted as "how many tokens back significantly influe
 | 0.7 | ~3 tokens |
 | 0.9 | ~10 tokens |
 | 0.99 | ~100 tokens |
+
+*Window approximates where historical weight drops below ~35% (decay^N ≈ 0.35).*
 
 **Mathematical interpretation:**
 
@@ -762,11 +934,11 @@ Keep temperature at 1.0 (neutral) and use target for creativity control. If temp
 - Top-P: Works, but somewhat redundant with Adaptive-P's targeting
 - Temperature: Works if mild
 
-**Samplers that Adaptive-P makes unnecessary:**
+**Samplers that Adaptive-P may reduce the need for:**
 
-- **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. External repetition penalty becomes redundant.
+- **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. In many cases, this reduces or eliminates the need for external repetition penalty.
 
-- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) more reliably and without the fat-tail redistribution problem. Users who previously relied on XTC typically disable it when using Adaptive-P.
+- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) with finer control and without the fat-tail redistribution concern. Users who previously relied on XTC often find they can disable it when using Adaptive-P.
 
 - **Mirostat:** Both target perplexity/entropy, but through different mechanisms. Additionally, Mirostat also requires being the final sampler in the chain—they cannot coexist. Use one or the other.
 
@@ -825,6 +997,30 @@ If Adaptive-P appears to have no effect:
 # 7. Empirical Validation
 
 This section presents empirical evidence that Adaptive-P achieves its design goals: successfully targeting specified probability ranges while maintaining output quality.
+
+## 7.0 A Note on Evaluation Metrics
+
+**Adaptive-P is designed for creative writing, not factual accuracy or predictability.** This scope constrains which evaluation metrics are meaningful.
+
+### Why Perplexity Is Not Reported
+
+Perplexity measures how well a model predicts the tokens in a reference text—lower perplexity indicates the model found the text more predictable. For a sampler explicitly designed to select *less* predictable tokens, perplexity degradation is the intended behavior, not a flaw to be measured.
+
+Consider: at target 0.3, Adaptive-P preferentially selects tokens the model assigns ~30% probability. By definition, these selections will have higher surprisal (and thus higher perplexity) than greedy or near-greedy decoding. Reporting this number would be equivalent to criticizing a random number generator for not producing sequential integers.
+
+The same logic applies to other likelihood-based metrics (BLEU against deterministic references, likelihood under the base model, etc.). These metrics assume the goal is reproducing predictable text. Adaptive-P assumes the opposite.
+
+### What Would Constitute Valid Evaluation
+
+Meaningful evaluation of creative sampling methods requires:
+
+- **Human preference studies:** Does output read as more engaging, varied, or creative?
+- **Diversity metrics:** Does the sampler produce more lexically or semantically varied output across multiple generations?
+- **Task-specific assessment:** For roleplay, does the output avoid repetitive phrasing? For fiction, does it produce unexpected but coherent plot developments?
+
+This paper does not include formal human evaluation studies. The empirical validation focuses on verifying that Adaptive-P achieves its mechanical goal (targeting specified probability ranges) rather than proving that this goal produces subjectively better creative writing. The latter claim—that probability targeting improves creative output—is supported by community testing and qualitative assessment but not by controlled studies.
+
+We invite researchers with human evaluation infrastructure to conduct such studies.
 
 ## 7.1 Selection Distribution Analysis
 
@@ -911,7 +1107,7 @@ Track calculated target over generation. Observe response to selection patterns.
 - After low-probability selection: calculated target rises (compensate by targeting higher)
 - Over time: calculated target oscillates around configured target
 
-The decay comparison charts in Section 7.2 show this adaptation in action—decay 0.5 produces large oscillations (fishtailing), while decay 0.99 shows nearly flat targeting.
+The decay comparison charts in Section 6.2 show this adaptation in action—decay 0.5 produces large oscillations (fishtailing), while decay 0.99 shows nearly flat targeting.
 
 ## 7.5 Initialization Validation
 
@@ -928,55 +1124,6 @@ We verify that correct initialization prevents the warmup artifacts shown with n
 <td width="50%"><strong>Correct initialization:</strong><br>**[Image]** *(File: target_d0.9.png)*<br><em>Correct init: Target stable from first token.</em></td>
 </tr>
 </table>
-
-## 7.6 Generation Stability Over Time
-
-> [!NOTE]
-> This phenomenon is observed empirically but not fully understood. The following is a working hypothesis based on testing and theoretical analysis.
-
-An unexpected benefit of Adaptive-P is improved generation stability over extended outputs. The cumulative average probability of selected tokens remains stable throughout generation, while temperature sampling shows continuous drift.
-
-<table>
-<tr>
-<td width="50%"><strong>Temperature Sampling:</strong><br>**[Image]** *(File: temp_stability.png)*<br><em>Cumulative average drifts continuously over time.</em></td>
-<td width="50%"><strong>Adaptive-P:</strong><br>**[Image]** *(File: adaptive_p_stability.png)*<br><em>Cumulative average stabilizes after ~50 tokens.</em></td>
-</tr>
-</table>
-
-### Why This Matters
-
-During the Llama 2 era, extensive testing revealed that models inevitably drift toward either:
-- **Repetition (boredom):** High-probability selections lead to boring context, which produces more boring token distributions
-- **Incoherence (confusion):** Low-probability selections lead to confused context, which produces more chaotic distributions
-
-This drift occurs even with "equal" sampling (temperature 1.0) due to pure RNG effects. It's analogous to driving without hands on the wheel—no matter how straight the initial alignment, random noise eventually causes drift.
-
-### Hypothesized Mechanism
-
-**The feedback loop (temperature):**
-1. RNG selects a slightly unusual token
-2. This unusual token enters context
-3. Context now contains slight noise
-4. Model produces distribution slightly more peaked or flat than baseline
-5. Selection from this distribution reinforces the drift
-6. Repeat until context degradation becomes noticeable
-
-**The counterforce (Adaptive-P):**
-1. Target forces consideration of mid-range tokens
-2. If recent selections were high-probability ("boring"), calculated target drops
-3. This steers next selection toward lower-probability alternatives
-4. If selections were low-probability ("confused"), target rises
-5. The elastic mechanism actively resists accumulation of probability extremes
-
-### Alternative Explanations
-
-This stability might also arise from:
-- **Distribution regularization:** The transformation produces more consistent post-softmax distributions regardless of input shape
-- **Selection diversity:** Higher token selection variance prevents repetitive context patterns that trigger model-internal feedback loops
-- **Entropy maintenance:** By maintaining broader effective candidate pools, Adaptive-P avoids the low-entropy death spiral
-
-Further research is needed to isolate the causal mechanism.
-
 
 ---
 
@@ -1175,77 +1322,13 @@ static struct llama_sampler * llama_sampler_adaptive_p_clone(
 }
 ```
 
-## 8.7 Porting Notes
-
-> [!CAUTION]
-> **The Python implementation below is provided for reference only and has not been tested.** Use with caution and verify correctness before use in production.
-
-**Python reference implementation:**
-
-```python
-import numpy as np
-
-class AdaptiveP:
-    def __init__(self, target=0.5, decay=0.9):
-        self.target = target
-        self.decay = np.clip(decay, 0.0, 0.99)
-        self.weighted_sum = target / (1.0 - self.decay)
-        self.total_weight = 1.0 / (1.0 - self.decay)
-    
-    def sample(self, logits):
-        if self.target < 0:
-            probs = softmax(logits)
-            return np.random.choice(len(probs), p=probs)
-        
-        # Get original probabilities
-        original_probs = softmax(logits)
-        
-        # Compute adapted target
-        avg = self.weighted_sum / self.total_weight
-        adapted_target = np.clip(2 * self.target - avg, 0, 1)
-        
-        # Transform
-        PEAK = 5.0
-        SHARPNESS = 10.0
-        INV_WIDTH = 5.0
-        
-        dist = np.abs((original_probs - adapted_target) * INV_WIDTH)
-        new_logits = PEAK - SHARPNESS * dist * dist / (1 + dist)
-        
-        # Sample
-        new_probs = softmax(new_logits)
-        idx = np.random.choice(len(new_probs), p=new_probs)
-        
-        # Update history
-        self.weighted_sum = original_probs[idx] + self.decay * self.weighted_sum
-        self.total_weight = 1.0 + self.decay * self.total_weight
-        
-        return idx
-
-def softmax(x):
-    x = x - np.max(x)
-    e = np.exp(x)
-    return e / e.sum()
-```
-
-**Framework integration points:**
-
-| Framework | Integration Point |
-|-----------|------------------|
-| llama.cpp | Sampler chain (`llama_sampler_chain_add`) |
-| vLLM | Custom sampler class |
-| Hugging Face | `LogitsProcessor` subclass |
-| exllamav2 | Sampler settings |
-
-
-
 ---
 
 # 9. Conclusion
 
 ## 9.1 Summary
 
-We have presented Adaptive-P, a novel sampling method for autoregressive language models that introduces probability targeting as an alternative to traditional truncation and scaling approaches.
+We have presented Adaptive-P, an alternative sampling method for autoregressive language models that introduces probability targeting as an alternative to traditional truncation and scaling approaches.
 
 **The problem addressed:**
 
@@ -1266,7 +1349,7 @@ Adaptive-P applies a distance-based transformation that preferentially selects t
 
 ## 9.2 Contributions
 
-This work makes the following contributions:
+This work offers the following:
 
 1. **Paradigm:** Probability targeting as a principled alternative to truncation-based sampling. Rather than asking "which tokens should we keep?" we ask "which probability range should we prefer?"
 
@@ -1302,13 +1385,12 @@ Adaptive-P is implemented in llama.cpp and available via PR to the main reposito
 
 ## Acknowledgments
 
-The author thanks the following contributors from the BeaverAI community for their invaluable assistance:
+This work wouldn't exist without the following contributors from the BeaverAI community for their invaluable assistance:
 
 - **mfunlimited** — Created and maintained the llama.cpp mainline PR (#17927), ported the C# implementation to C++, iterated through multiple algorithm versions, and coordinated with upstream maintainers
 - **concedo** — Identified the long tail issue with the original Lorentzian formula, collaborated on deriving the correct initialization formula (`target / (1 - decay)`), validated mathematical correctness, and implemented the sampler in KoboldCpp
 - **aessedai** — Created and maintained the SillyTavern fork with sampler support, hosted test APIs for community testing, and created Docker images for RunPod deployment
 - **geechan** — Community coordination, documentation planning, opened the ik_llama feature request, and organized testing efforts across models
-- **dungquixote42** — Created the initial ik_llama.cpp port PR
 
 Special thanks to the broader llama.cpp community for their continued development of accessible LLM inference tooling.
 
@@ -1450,7 +1532,7 @@ Panic finally clawed its way through the fog of denial. I tried to push myself u
 
 ### Target 0 No Minp
 
-# Target 0 WITHOUT Min-P
+# Target 0.1 WITHOUT Min-P
 
 **Settings:** `--adaptive-target 0.1 --adaptive-decay 0.9` (no min-p filtering)
 
@@ -1494,11 +1576,6 @@ The headline would scream a small scandal of a sort. It was not about illicit ch
 **Prompt:** *"Write a 5 paragraph story about a talking dog that doesn't believe animals can talk."*
 
 ---
-
-<!-- TODO: Generate sample output
-  Run with target 0 AND min-p 0.05 to demonstrate coherent but creative output
-  when min-p removes garbage tokens before Adaptive-P selects.
--->
 
 Barney wasn’t just a terrier with scruffy ears; Barney was a walking, balking contradiction. Every morning, as he munched on kibble in Mrs. Henderson’s kitchen, he’d narrate his inner thoughts in surprisingly clear, human cadences, lamenting the crunchiness or questioning the flavor choices. “Honestly,” he’d mutter one sunny morning, peering out the back window where the neighborhood squirrel chattered, “Silly little critters, running about chattering away like that. Probably dreaming up trouble, just making noises.” Barney could hold lengthy discussions with his boy, Leo, about everything from the indignity of bath-time to the injustice of shared pizza toppings lacking crusts. Yet, if any other animal – from Mrs. Henderson’s Siamese, Percy, who occasionally meowed sharp questions at the mail slot, to Leo’s pet budgie, Pip, who warbled nonsensical dittles – seemed capable of articulate sound, Barney would simply snort, flicking his tail. “That’s not talking, that’s just... well, barking and meowing! Proper communication? Humans talking to me, now *that’s* the civilized world.” The concept that other creatures possessed anything close to his unique skill, the very essence of his special status in his own eyes, was utterly laughable. It wasn't ignorance; it was a fervently maintained delusion.
 

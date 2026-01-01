@@ -1,4 +1,4 @@
-# Target 0 WITHOUT Min-P
+# Target 0.1 WITHOUT Min-P
 
 **Settings:** `--adaptive-target 0.1 --adaptive-decay 0.9` (no min-p filtering)
 

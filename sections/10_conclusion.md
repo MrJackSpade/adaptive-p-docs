@@ -1,8 +1,8 @@
-# 8. Conclusion
+# 9. Conclusion
 
-## 8.1 Summary
+## 9.1 Summary
 
-We have presented Adaptive-P, a novel sampling method for autoregressive language models that introduces probability targeting as an alternative to traditional truncation and scaling approaches.
+We have presented Adaptive-P, an alternative sampling method for autoregressive language models that introduces probability targeting as an alternative to traditional truncation and scaling approaches.
 
 **The problem addressed:**
 
@@ -21,9 +21,9 @@ Adaptive-P applies a distance-based transformation that preferentially selects t
 3. **No fat tails:** Unlike XTC-style redistribution, probability concentrates on near-target tokens rather than spreading to garbage
 
 
-## 8.2 Contributions
+## 9.2 Contributions
 
-This work makes the following contributions:
+This work offers the following:
 
 1. **Paradigm:** Probability targeting as a principled alternative to truncation-based sampling. Rather than asking "which tokens should we keep?" we ask "which probability range should we prefer?"
 
@@ -33,7 +33,7 @@ This work makes the following contributions:
 
 4. **Validation:** Empirical demonstration that Adaptive-P achieves its targeting goal across varied models and prompts.
 
-## 8.3 Limitations
+## 9.3 Limitations
 
 **Adaptive-P cannot create diversity that doesn't exist.** If a model's distribution has only one viable token (p ≈ 1.0), or all candidates are far from target, the sampler cannot manufacture mid-range options. It operates on available candidates.
 
@@ -41,7 +41,7 @@ This work makes the following contributions:
 
 **Parameter tuning still required.** While "target" is more intuitive than "temperature," users must still learn what probability range produces their desired output quality. The default (0.5) works well for many cases but isn't universal.
 
-## 8.4 Future Work
+## 9.4 Future Work
 
 **Adaptive constants:** The current SHARPNESS value (10.0) was empirically tuned. Automatic tuning based on input distribution characteristics could improve robustness.
 
@@ -51,7 +51,7 @@ This work makes the following contributions:
 
 **Broader framework support:** Current implementation targets llama.cpp. Ports to vLLM, Hugging Face Transformers, and other popular frameworks would increase accessibility.
 
-## 8.5 Availability
+## 9.5 Availability
 
 Adaptive-P is implemented in llama.cpp and available via PR to the main repository. Source code and documentation are provided under permissive license.
 
@@ -59,13 +59,12 @@ Adaptive-P is implemented in llama.cpp and available via PR to the main reposito
 
 ## Acknowledgments
 
-The author thanks the following contributors from the BeaverAI community for their invaluable assistance:
+This work wouldn't exist without the following contributors from the BeaverAI community for their invaluable assistance:
 
 - **mfunlimited** — Created and maintained the llama.cpp mainline PR (#17927), ported the C# implementation to C++, iterated through multiple algorithm versions, and coordinated with upstream maintainers
 - **concedo** — Identified the long tail issue with the original Lorentzian formula, collaborated on deriving the correct initialization formula (`target / (1 - decay)`), validated mathematical correctness, and implemented the sampler in KoboldCpp
 - **aessedai** — Created and maintained the SillyTavern fork with sampler support, hosted test APIs for community testing, and created Docker images for RunPod deployment
 - **geechan** — Community coordination, documentation planning, opened the ik_llama feature request, and organized testing efforts across models
-- **dungquixote42** — Created the initial ik_llama.cpp port PR
 
 Special thanks to the broader llama.cpp community for their continued development of accessible LLM inference tooling.
 

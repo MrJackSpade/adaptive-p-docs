@@ -26,11 +26,12 @@ $SectionFiles = @(
     "02_introduction.md",
     "03_related_work.md",
     "04_algorithm.md",
-    "05_parameters.md",
-    "06_integration.md",
-    "07_empirical_validation.md",
-    "08_implementation.md",
-    "09_conclusion.md"
+    "05_design_justification.md",
+    "06_parameters.md",
+    "07_integration.md",
+    "08_empirical_validation.md",
+    "09_implementation.md",
+    "10_conclusion.md"
 )
 
 # Track referenced sample files for embedding
@@ -180,6 +181,7 @@ $output += "- [Abstract](#abstract)"
 $output += "- [1. Introduction](#1-introduction)"
 $output += "- [2. Related Work and Comparative Analysis](#2-related-work-and-comparative-analysis)"
 $output += "- [3. The Adaptive-P Algorithm](#3-the-adaptive-p-algorithm)"
+$output += "- [4. Design Justification](#4-design-justification)"
 $output += "- [5. Parameters](#5-parameters)"
 $output += "- [6. Integration and Sampler Chain](#6-integration-and-sampler-chain)"
 $output += "- [7. Empirical Validation](#7-empirical-validation)"

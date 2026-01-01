@@ -1,8 +1,8 @@
-# 7. Implementation Reference
+# 8. Implementation Reference
 
 This section provides the complete implementation for reference and porting to other frameworks.
 
-## 7.1 Data Structures
+## 8.1 Data Structures
 
 ```cpp
 struct llama_sampler_adaptive_p {
@@ -21,7 +21,7 @@ struct llama_sampler_adaptive_p {
 };
 ```
 
-## 7.2 Constants
+## 8.2 Constants
 
 ```cpp
 #define PEAK_LOGIT_VALUE    5.0f    // Maximum logit for on-target tokens
@@ -30,7 +30,7 @@ struct llama_sampler_adaptive_p {
 #define INV_WIDTH           (1.0f / DISTRIBUTION_WIDTH)  // Precomputed inverse
 ```
 
-## 7.3 Initialization
+## 8.3 Initialization
 
 ```cpp
 struct llama_sampler * llama_sampler_init_adaptive_p(
@@ -58,7 +58,7 @@ struct llama_sampler * llama_sampler_init_adaptive_p(
 
 **Critical:** The weighted_sum and total_weight initialization prevents warmup artifacts. Starting at (0, 0) would cause the calculated target to spike low on first high-probability selection.
 
-## 7.4 Core Algorithm
+## 8.4 Core Algorithm
 
 ```cpp
 static void llama_sampler_adaptive_p_apply(
@@ -121,7 +121,7 @@ static void llama_sampler_adaptive_p_apply(
 }
 ```
 
-## 7.5 Supporting Functions
+## 8.5 Supporting Functions
 
 **Softmax implementation** (typical):
 
@@ -168,7 +168,7 @@ static int llama_sample_dist(
 }
 ```
 
-## 7.6 Reset and Clone
+## 8.6 Reset and Clone
 
 For proper sampler lifecycle management:
 
@@ -192,66 +192,3 @@ static struct llama_sampler * llama_sampler_adaptive_p_clone(
     return llama_sampler_init_adaptive_p(ctx->target, ctx->decay, ctx->seed);
 }
 ```
-
-## 7.7 Porting Notes
-
-> [!CAUTION]
-> **The Python implementation below is provided for reference only and has not been tested.** Use with caution and verify correctness before use in production.
-
-**Python reference implementation:**
-
-```python
-import numpy as np
-
-class AdaptiveP:
-    def __init__(self, target=0.5, decay=0.9):
-        self.target = target
-        self.decay = np.clip(decay, 0.0, 0.99)
-        self.weighted_sum = target / (1.0 - self.decay)
-        self.total_weight = 1.0 / (1.0 - self.decay)
-    
-    def sample(self, logits):
-        if self.target < 0:
-            probs = softmax(logits)
-            return np.random.choice(len(probs), p=probs)
-        
-        # Get original probabilities
-        original_probs = softmax(logits)
-        
-        # Compute adapted target
-        avg = self.weighted_sum / self.total_weight
-        adapted_target = np.clip(2 * self.target - avg, 0, 1)
-        
-        # Transform
-        PEAK = 5.0
-        SHARPNESS = 10.0
-        INV_WIDTH = 5.0
-        
-        dist = np.abs((original_probs - adapted_target) * INV_WIDTH)
-        new_logits = PEAK - SHARPNESS * dist * dist / (1 + dist)
-        
-        # Sample
-        new_probs = softmax(new_logits)
-        idx = np.random.choice(len(new_probs), p=new_probs)
-        
-        # Update history
-        self.weighted_sum = original_probs[idx] + self.decay * self.weighted_sum
-        self.total_weight = 1.0 + self.decay * self.total_weight
-        
-        return idx
-
-def softmax(x):
-    x = x - np.max(x)
-    e = np.exp(x)
-    return e / e.sum()
-```
-
-**Framework integration points:**
-
-| Framework | Integration Point |
-|-----------|------------------|
-| llama.cpp | Sampler chain (`llama_sampler_chain_add`) |
-| vLLM | Custom sampler class |
-| Hugging Face | `LogitsProcessor` subclass |
-| exllamav2 | Sampler settings |
-

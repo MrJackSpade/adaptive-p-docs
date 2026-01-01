@@ -162,7 +162,7 @@ The practical difference:
 
 This is the "selective redistribution" property. Probability doesn't flow uniformly to all candidates—it concentrates on those closest to target.
 
-The XTC comparison charts in Section 2.5 illustrate this directly: XTC's uniform redistribution boosts all tail tokens (green lines up), while Adaptive-P concentrates probability on near-target tokens and suppresses the tail (red lines down).
+The XTC comparison charts in Section 2.5 illustrate this directly: XTC's renormalization boosts all tail tokens proportionally (green lines up), while Adaptive-P concentrates probability on near-target tokens and suppresses the tail (red lines down).
 
 ## 3.6 Softmax Normalization
 
