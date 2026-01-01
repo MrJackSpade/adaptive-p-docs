@@ -5,9 +5,8 @@
 # file with:
 #   - Table of contents from README.md structure
 #   - All section content concatenated in order  
-#   - Images base64 encoded and embedded inline
+#   - Images referenced via relative links to charts/ folder (NOT embedded)
 #   - Sample files embedded inline where referenced (with anchor links)
-#   - No external references - fully self-contained
 # ============================================================================
 
 param(
@@ -41,35 +40,6 @@ $global:ReferencedSamples = @{}
 # Helper Functions
 # ============================================================================
 
-function Get-MimeType {
-    param([string]$Extension)
-    switch ($Extension.ToLower()) {
-        ".png" { return "image/png" }
-        ".jpg" { return "image/jpeg" }
-        ".jpeg" { return "image/jpeg" }
-        ".gif" { return "image/gif" }
-        ".webp" { return "image/webp" }
-        ".svg" { return "image/svg+xml" }
-        default { return "image/png" }
-    }
-}
-
-function ConvertTo-Base64DataUri {
-    param([string]$FilePath)
-    
-    if (-not (Test-Path $FilePath)) {
-        Write-Warning "Image not found: $FilePath"
-        return $null
-    }
-    
-    $bytes = [System.IO.File]::ReadAllBytes($FilePath)
-    $base64 = [Convert]::ToBase64String($bytes)
-    $ext = [System.IO.Path]::GetExtension($FilePath)
-    $mime = Get-MimeType $ext
-    
-    return "data:$mime;base64,$base64"
-}
-
 function Get-SampleAnchor {
     param([string]$FileName)
     
@@ -86,18 +56,14 @@ function Process-MarkdownLine {
     $processedLine = $Line
     
     # Process markdown image syntax: ![alt](../charts/image.png)
+    # Convert "../charts/" to "charts/" for relative linking in the root docs folder
     if ($Line -match '!\[([^\]]*)\]\(([^)]+)\)') {
         $altText = $Matches[1]
         $imgPath = $Matches[2]
         
         if ($imgPath -match '^\.\./charts/') {
-            $fullPath = $imgPath -replace '\.\./charts/', "$ChartsDir\"
-            $fullPath = $fullPath -replace '/', '\'
-            $dataUri = ConvertTo-Base64DataUri $fullPath
-            
-            if ($dataUri) {
-                $processedLine = $Line -replace [regex]::Escape("![$altText]($imgPath)"), "![$altText]($dataUri)"
-            }
+            $newPath = $imgPath -replace '\.\./charts/', "charts/"
+            $processedLine = $Line -replace [regex]::Escape("![$altText]($imgPath)"), "![$altText]($newPath)"
         }
     }
     
@@ -106,13 +72,8 @@ function Process-MarkdownLine {
         $imgPath = $Matches[1]
         
         if ($imgPath -match '^\.\./charts/') {
-            $fullPath = $imgPath -replace '\.\./charts/', "$ChartsDir\"
-            $fullPath = $fullPath -replace '/', '\'
-            $dataUri = ConvertTo-Base64DataUri $fullPath
-            
-            if ($dataUri) {
-                $processedLine = $Line -replace [regex]::Escape($imgPath), $dataUri
-            }
+            $newPath = $imgPath -replace '\.\./charts/', "charts/"
+            $processedLine = $Line -replace [regex]::Escape($imgPath), $newPath
         }
     }
     
@@ -169,7 +130,8 @@ $output += "# Adaptive-P Sampler - Complete Documentation"
 $output += ""
 $output += "> **Compiled on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')**"
 $output += ">"
-$output += "> This is a self-contained version of the Adaptive-P documentation with all images embedded as base64 and all sample files included inline. No external references."
+$output += "> This document has been compiled from individual sections."
+$output += "> Images are referenced relative to the 'charts' folder."
 $output += ""
 $output += "---"
 $output += ""
