@@ -1,30 +1,74 @@
-# Adaptive-P Documentation TODO
+# TODO.md - Adaptive-P Documentation Fixes
 
-## 03_related_work.md
-- [ ] **Generate Min-P comparison samples** — Generate target 0 text with and without min-p to demonstrate guardrail effect (stub files created at `samples/target_0_no_minp.md` and `samples/target_0_with_minp.md`)
+## Priority 1: Blocking Issues (Must fix before posting)
 
----
-
-## 04_algorithm.md
-- [x] **Create Graph [G-7]: Illustrative Bell Curve** — Logit transformation curve centered at targets 0.3, 0.5, and 0.7 (label as "illustrative of transformation function only" since real distributions are sparse)
-- [x] **Create Graph [G-8]: Four Pattern Examples** — Four panels showing input→output probabilities for Forced Choice, Binary Split, Clustered Tail, and Competitive Mid-Range patterns (use actual samples.log data)
-- [x] **Create Graph [G-10]: Transformation Function Shape** — Plot PEAK - SHARPNESS × dist² / (1 + dist) showing quadratic core transitioning to linear tails
-- [x] **Create Graph [G-12]: Pre vs. Post Softmax** — Show raw logit values and corresponding post-softmax probabilities for a real sample
+- [ ] **Fix Section 4 numbering** — TOC jumps from Section 3 to Section 5
+- [ ] **Remove TODO marker in Abstract** — `<!-- TODO: Abstract length (~250 words...`
+- [ ] **Remove stale TODO comment in "Target 0 WITH Min-P" sample** — Comment left behind after content was generated
+- [ ] **Test or remove Python implementation** — Currently marked "has not been tested"
 
 ---
 
-## 09_conclusion.md
-- [x] **Add Acknowledgments** — mfunlimited, geechan, concedo, kurgan1138
-- [ ] **Add References** — Mirostat paper, top-p paper, etc.
-- [ ] **Add Appendix** (if needed)
+## Priority 2: Unsupported Claims (High risk of criticism)
+
+- [ ] **Derive the 2.0 multiplier explicitly** — `calculated_target = 2.0 × configured_target − weighted_average` appears without mathematical justification
+- [ ] **Demonstrate or remove cross-model consistency claim** — Claimed multiple times, all samples from one model (GLM-4.5-Air-Q4_K_M)
+- [ ] **Add effective history window derivation** — Table gives "~10 tokens" for decay 0.9 without showing `1/(1-decay)`
+- [ ] **Soften "makes unnecessary" claims** — DRY/Repetition Penalty replacement asserted without comparative evidence
+- [ ] **Justify or soften Mirostat criticism** — "Fails with modern models" is strong; needs empirical backing or softening
 
 ---
 
-## Summary
+## Priority 3: Methodological Gaps (Will be questioned)
 
-| Priority | Count | Items |
-|----------|-------|-------|
-| **Graphs** | 1 | G-3 |
-| **Text/Citations** | 1 | References |
+- [ ] **Specify experimental methodology** — "25,000+ tokens across varied prompts" needs: which models, which prompts, how many runs, prompt diversity
+- [ ] **Add samples from different model** — All samples currently from GLM-4.5-Air-Q4_K_M
+- [ ] **Justify transformation function choice** — Why `dist² / (1 + dist)` vs Gaussian or other forms?
+- [ ] **Justify magic constants** — PEAK=5.0, SHARPNESS=10.0, WIDTH=0.2 are "empirically tuned" without detail
+- [ ] **Add ablation studies or acknowledge absence** — What if adaptive component removed? Different transformation?
 
-**Note:** Sample files (`target_0.3_sample.md`, etc.) and most charts are already in place ✅
+---
+
+## Priority 4: Presentation/Tone Issues (Medium risk)
+
+- [ ] **Decide on "slop" terminology** — Community jargon in academic-styled paper; either commit to informal or remove
+- [ ] **Reframe criticism of existing methods** — "None can say prefer 0.2 over 0.7" implies deficiency; reframe as different goals
+- [ ] **Specify XTC implementation being criticized** — "Uniform redistribution" may not apply to all variants
+- [ ] **Cite RLHF → sharper distributions claim** — Currently asserted without reference
+- [ ] **Address Section 7.6 speculation** — Stability benefit is "not fully understood"; consider moving to Future Work
+
+---
+
+## Priority 5: Nice-to-Have Improvements (Lower risk)
+
+- [ ] **Add standard NLG metrics** — No perplexity, MAUVE, or human evaluation
+- [ ] **Expand references** — Only 6, no engagement with broader sampling literature
+- [ ] **Acknowledge quick brown fox example is simplified** — Most high-confidence chains are subtler
+- [ ] **Statistical significance testing** — No controlled comparisons with baselines
+
+---
+
+## Working Notes
+
+### Section 4 Resolution
+Options:
+1. Renumber Section 5+ to 4+
+2. Insert missing Section 4 content (what was planned?)
+3. Add a Section 4 as transitional content
+
+### Cross-Model Consistency
+Options:
+1. Run samples on Llama, Mistral, etc. with same prompts/settings
+2. Remove/soften all cross-model claims (appears in: Abstract, 1.3, 5.1)
+3. Reframe as "observed in testing" without strong generalization
+
+### 2.0 Multiplier Derivation
+The formula comes from: wanting `E[selected_prob] = target`
+If historical average is `avg`, and we want the new selection to pull toward target:
+- New selection ≈ calculated_target (on average)
+- New average ≈ (calculated_target + avg) / 2 (simplified)
+- Want new average = target
+- So: (calculated_target + avg) / 2 = target
+- Therefore: calculated_target = 2*target - avg
+
+(This is the intuition; actual derivation involves the weighted EMA)

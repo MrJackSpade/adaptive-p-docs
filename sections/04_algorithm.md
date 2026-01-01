@@ -64,7 +64,18 @@ Two tokens close in probability, both reasonably near target. This is where the 
 
 **Effect:** The quadratic shape provides fine differentiation between close candidates. A token at distance 0.02 from target gets a noticeably different logit than one at distance 0.08, allowing the sampler to express graduated preference rather than treating all near-target tokens identically.
 
-![Four pattern examples showing input vs output probability transformations](../charts/g8_patterns.png)
+<table>
+<tr>
+<td width="50%"><img src="../charts/g8a_forced.png" width="100%"><br><em>Pattern A: Single token forced selection</em></td>
+<td width="50%"><img src="../charts/g8b_binary.png" width="100%"><br><em>Pattern B: Binary split (94% vs 6%)</em></td>
+</tr>
+<tr>
+<td width="50%"><img src="../charts/g8c_gap.png" width="100%"><br><em>Pattern C: Gap in middle (no tokens near target)</em></td>
+<td width="50%"><img src="../charts/g8d_full.png" width="100%"><br><em>Pattern D: Full range (0.0 to 1.0)</em></td>
+</tr>
+</table>
+
+*Line graphs show original probability (x-axis) vs transformed probability (y-axis). Dashed diagonal = no change; dotted horizontal = target (0.5).*
 
 ## 3.3 Configured Target vs. Calculated Target
 

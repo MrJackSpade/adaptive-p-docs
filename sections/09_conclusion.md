@@ -69,3 +69,29 @@ The author thanks the following contributors from the BeaverAI community for the
 
 Special thanks to the broader llama.cpp community for their continued development of accessible LLM inference tooling.
 
+> [!NOTE]
+> **AI Disclosure:** This documentation was written with the assistance of AI language models. However, the Adaptive-P algorithm, its mathematical formulation, empirical validation, and all technical contributions presented in this paper are the original work of the author and human collaborators listed above. AI was used solely as a writing aid for documentation purposes.
+
+---
+
+## References
+
+[1] **Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y.** (2020). *The Curious Case of Neural Text Degeneration.* International Conference on Learning Representations (ICLR). arXiv:1904.09751.
+> Introduced **nucleus sampling (top-p)**, showing that maximization-based decoding leads to degenerate text and proposing dynamic truncation of the probability distribution.
+
+[2] **Fan, A., Lewis, M., & Dauphin, Y.** (2018). *Hierarchical Neural Story Generation.* Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (ACL).
+> Introduced **top-k sampling** for neural text generation, demonstrating improved diversity over beam search for creative writing tasks.
+
+[3] **Basu, S., Ramachandran, G. S., Keskar, N. S., & Varshney, L. R.** (2021). *Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity.* International Conference on Learning Representations (ICLR). arXiv:2007.14966.
+> Introduced **Mirostat**, which dynamically adjusts top-k to maintain target perplexity. This work was the original inspiration for Adaptive-P's probability targeting approach.
+
+[4] **Nguyen, M. N., Baker, A., Neo, C., Roush, A., Kirsch, A., & Shwartz-Ziv, R.** (2025). *Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs.* International Conference on Learning Representations (ICLR). arXiv:2407.01082.
+> Introduced **min-p sampling**, which dynamically sets a probability threshold relative to the top token. Min-p serves as a complementary guardrail to Adaptive-P.
+
+[5] **Hinton, G., Vinyals, O., & Dean, J.** (2015). *Distilling the Knowledge in a Neural Network.* arXiv:1503.02531.
+> Introduced softmax **temperature scaling** for knowledge distillation, establishing the foundational mechanism used by temperature sampling in language models.
+
+[6] **Ackley, D. H., Hinton, G. E., & Sejnowski, T. J.** (1985). *A Learning Algorithm for Boltzmann Machines.* Cognitive Science, 9(1), 147-169.
+> Early work on **stochastic sampling** with temperature in neural networks, establishing the temperature parameter's role in controlling exploration-exploitation tradeoffs.
+
+
