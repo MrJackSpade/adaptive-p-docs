@@ -79,13 +79,15 @@ Min-P and Adaptive-P are complementary. Min-P serves as a guardrail that cleans 
 
 The samples in this paper show tokens already filtered to p > 0.01—that's min-p at work. Adaptive-P assumes this cleanup has happened and focuses on the selection decision among viable candidates.
 
-> **Graph [G-3]: Min-P as Guardrail**  
-> *Show a full vocabulary distribution (with garbage tail) before min-p, then the cleaned distribution after min-p, then the Adaptive-P transform result. Demonstrate the pipeline.*
+### Min-P as Guardrail: Text Comparison
 
-<!-- TODO: Pre-min-p data needed for G-3
-  @claude: Current samples.log already has min-p applied. Need pre-filtered data.
-  @loxifi: 
--->
+The stabilizing effect of min-p on low-target generations is best demonstrated through reading. With target 0 (maximum creativity), Adaptive-P aggressively prefers the lowest-probability tokens. Without min-p, garbage tokens become valid selections. With min-p, only quality candidates remain.
+
+**Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
+
+**[Target 0 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
+
+**[Target 0 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
 
 ## 2.5 XTC (eXclude Top Choices)
 
@@ -135,11 +137,6 @@ Modern models, especially those trained with RLHF, produce much sharper distribu
 The samples in this paper illustrate this reality: most token selections have only 2-5 viable candidates after min-p filtering. Top-K adjustment cannot create variety that doesn't exist in the distribution.
 
 Adaptive-P addresses this by operating on probabilities directly, not on rank. It can boost a 0.1 probability token's chances relative to a 0.8 probability token, which Top-K adjustment cannot accomplish.
-
-<!-- TODO: Add Mirostat discussion quote from chat logs
-  @claude: Key discussion around showcase log lines 200-400.
-  @loxifi: 
--->
 
 ## 2.7 Why Adaptive-P is Different: Selective Redistribution
 

@@ -21,22 +21,19 @@ Comparison with Temperature, Top-K, Top-P, Min-P, XTC, and Mirostat. Why uniform
 ### [3. The Algorithm](sections/04_algorithm.md)
 Core probability targeting, real distribution patterns (forced choice, binary split, clustered tail), configured vs. calculated target, the logit transformation function, and why unbounded negative logits matter.
 
-### [4. Parameters](sections/05_parameters.md)
+### [5. Parameters](sections/05_parameters.md)
 `target` (0.0–1.0), `decay` (0.0–0.99), internal constants. Includes elasticity/stubbornness/fishtailing behavior and why SHARPNESS isn't user-configurable.
 
-### [5. Integration](sections/06_integration.md)
+### [6. Integration](sections/06_integration.md)
 Chain positioning (must be last), Min-P complementarity, temperature interaction, samplers made unnecessary. Includes llama.cpp usage examples.
 
-### [6. Empirical Validation](sections/07_empirical_validation.md)
+### [7. Empirical Validation](sections/07_empirical_validation.md)
 Selection distribution analysis, target achievement, comparisons with temperature, adaptation dynamics, initialization validation, cross-model consistency.
 
-### [7. Model Considerations](sections/08_model_considerations.md)
-Guidance for diverse vs. peaked distributions, instruct vs. base models, quantization effects, and model-specific tuning steps.
-
-### [8. Implementation Reference](sections/09_implementation.md)
+### [8. Implementation Reference](sections/08_implementation.md)
 Complete annotated C++ implementation, Python pseudocode, data structures, and porting notes.
 
-### [9. Conclusion](sections/10_conclusion.md)
+### [9. Conclusion](sections/09_conclusion.md)
 Summary of contributions, limitations, and future work directions.
 
 ---
@@ -46,8 +43,8 @@ Summary of contributions, limitations, and future work directions.
 ```bash
 ./llama-cli -m model.gguf \
     --min-p 0.05 \
-    --adaptive-p-target 0.5 \
-    --adaptive-p-decay 0.9 \
+    --adaptive-target 0.5 \
+    --adaptive-decay 0.9 \
     -p "Once upon a time"
 ```
 

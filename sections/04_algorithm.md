@@ -87,7 +87,7 @@ calculated_target = 2.0 × configured_target − weighted_average
 
 **Intuition:** If recent selections averaged 0.6 probability but the user wants 0.5, the calculated target drops to 0.4 to compensate. The algorithm "aims past" the configured target to pull the average back toward it.
 
-**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average. See Section 6.2 for charts showing this behavior at different decay values.
+**In practice:** Calculated targets typically vary by about 2% around the configured target (e.g., 0.48–0.52 when configured at 0.5). This small variation shows the adaptation in action—compensating for natural selection variance to maintain the desired average. See Section 7.2 for charts showing this behavior at different decay values.
 
 The calculated target is clamped to [0.0, 1.0] before use. Extreme historical selections can push the raw calculated value outside this range, but the clamping ensures the transformation remains well-defined.
 
@@ -221,10 +221,9 @@ For target=0.5, decay=0.9:
 
 This primes the history as if infinitely many tokens at the target probability had been selected, providing stable behavior from the first token.
 
-> **Graph [G-13]: Initialization Effect**  
-> *Compare first 50 tokens with bad initialization (target starts at 0, slowly recovers) vs. correct initialization (stable from start). The target values graph you provided shows the bad case clearly.*
-
-<!-- TODO: G-13 needs correct initialization version
-  @claude: Image 0 shows bad case (recovery over 80 tokens). Need correct init version.
-  @loxifi: 
--->
+<table>
+<tr>
+<td width="50%"><strong>Bad initialization (naive):</strong><br><img src="../charts/bad_init.png" width="100%"><br><em>Naive init: Target drops to 0, takes ~100 tokens to recover.</em></td>
+<td width="50%"><strong>Correct initialization:</strong><br><img src="../charts/target_d0.9.png" width="100%"><br><em>Correct init: Target stable from first token.</em></td>
+</tr>
+</table>
