@@ -1,13 +1,13 @@
 # Adaptive-P Sampler Documentation
 
-A probability-targeting sampler for autoregressive language models that breaks high-confidence token chains while maintaining coherent output.
+A sampler for autoregressive language models that selects tokens near a configurable target probability over time.
 
 > [!NOTE]
-> Implementation available via [llama.cpp PR #17927](https://github.com/ggml-org/llama.cpp/pull/17927)
+> Implementation available in [llama.cpp#17927](https://github.com/ggml-org/llama.cpp/pull/17927)
 
 ---
 
-## Documentation Sections
+## Documentation sections
 
 ### [Abstract](sections/01_abstract.md)
 Summary of Adaptive-P's probability-targeting approach, key contributions, and empirical findings.
@@ -33,8 +33,8 @@ Chain positioning (must be last), Min-P complementarity, temperature interaction
 ### [7. Empirical Validation](sections/08_empirical_validation.md)
 Selection distribution analysis, target achievement, comparisons with temperature, adaptation dynamics, initialization validation, cross-model consistency.
 
-### [8. Implementation Reference](sections/09_implementation.md)
-Complete annotated C++ implementation, Python pseudocode, data structures, and porting notes.
+### [8. Reference Implementation](sections/09_implementation.md)
+Annotated C++ implementation, Python pseudocode, data structures, and porting notes.
 
 ### [9. Conclusion](sections/10_conclusion.md)
 Summary of contributions, limitations, and future work directions.
@@ -45,12 +45,16 @@ Summary of contributions, limitations, and future work directions.
 
 ```bash
 ./llama-cli -m model.gguf \
+    --samplers "min-p;adaptive-p" \
     --min-p 0.05 \
     --adaptive-target 0.5 \
     --adaptive-decay 0.9 \
     -p "Once upon a time"
 ```
 
-**Key parameters:**
-- `target`: Desired average selection probability (0.5 = mid-range tokens)
-- `decay`: History responsiveness (0.9 default; lower for peaked models)
+This sampler exposes two parameters:
+
+| Parameter name | Description                                                                                                | CLI argument          | Valid range | Default value | Notes                                                                                                                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------- | --------------------- | ----------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`       | Select tokens near this probability                                                                        | `--adaptive-target N` | 0.0 - 1.0   | -1.0          | When set to -1.0, the adaptive probability transform is **disabled**, and instead it just samples normally. Note that since the default value is -1.0, the sampler is disabled by default. This is intentional. |
+| `decay`        | Decay value for exponential moving average - lower values are more reactive, higher values are more stable | `--adaptive-decay N`  | 0.0 - 0.99  | 0.90          | Clamped to <=0.99 at init to avoid unbounded accumulation                                                                                                                                                       |
