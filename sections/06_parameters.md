@@ -46,7 +46,7 @@ Unlike temperature, which produces different effects depending on input distribu
 
 **Intuition for parameter tuning:**
 
-Users report that the target parameter feels intuitive once understood. "I want the model to pick tokens it's about 40% confident in" translates directly to target 0.4. This contrasts with temperature where "temperature 1.2" has no obvious semantic meaning.
+Target values are intuitively proportional to confidence percentage (target 0.4 = model prioritizes tokens in the 40% probability range). This contrasts with temperature, where "temperature 1.2" has no direct correlation.
 
 ## 5.2 Decay
 
@@ -93,7 +93,7 @@ Decay doesn't change *where* the sampler targets—that's controlled by target. 
 - Low target + high decay: Consistently creative selections
 - Low target + low decay: Variable, sometimes creative
 
-Most users keep decay at default (0.9) and adjust only target.
+For most use cases, decay should be kept at a default value of 0.9, while adjusting only target.
 
 **Why decay is configurable:**
 
@@ -127,9 +127,9 @@ This value was tuned empirically across multiple models and use cases. The value
 - Sufficient discrimination (tokens at different distances receive meaningfully different logits)
 - Not over-aggressive (moderately distant tokens still have non-trivial selection probability)
 
-**DISTRIBUTION_WIDTH (0.2):**
+**DISTRIBUTION_WIDTH (0.3):**
 
-Scales the distance calculation. Effectively defines "nearby" in probability space. At width 0.2, a token at distance 0.2 from target (one width unit away) receives notably suppressed logit.
+Scales the distance calculation. Effectively defines "nearby" in probability space. At width 0.3, a token at distance 0.3 from target (one width unit away) receives notably suppressed logit.
 
 The inverse (INV_WIDTH = 5.0) appears in the transformation to avoid runtime division.
 
