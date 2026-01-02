@@ -18,7 +18,7 @@ If other samplers follow Adaptive-P, they would either:
 - Operate on already-transformed logits (producing undefined behavior)
 
 > [!IMPORTANT]
-> **The transformation is destructive.** Adaptive-P doesn't just adjust logits—it *replaces* them entirely based on probability-to-target distance. The original model logits (which encode semantic meaning, confidence, etc.) are gone. This is why Adaptive-P must be last: no subsequent sampler could make sense of the transformed values, and the token selection happens as part of the transformation itself.
+> **The transformation is destructive.** Adaptive-P *replaces* logits entirely based on probability-to-target distance. The original model logits (which encode semantic meaning, confidence, etc.) are gone. This is why Adaptive-P must be last: no subsequent sampler could make sense of the transformed values, and the token selection happens as part of the transformation itself.
 
 **Recommended minimal chain:**
 
@@ -26,7 +26,7 @@ If other samplers follow Adaptive-P, they would either:
 min_p → adaptive_p
 ```
 
-Min-P removes garbage tokens. Adaptive-P selects from remaining candidates.
+Min-P removes incoherent tokens. Adaptive-P selects from remaining candidates.
 
 **Extended chain:**
 
@@ -34,9 +34,8 @@ Min-P removes garbage tokens. Adaptive-P selects from remaining candidates.
 top_k → min_p → temperature → adaptive_p
 ```
 
-This chain:
 1. Top-K: Optional initial truncation for efficiency
-2. Min-P: Quality guardrail—removes garbage
+2. Min-P: Quality guardrail—removes undesirable tokens
 3. Temperature: Optional distribution shaping (mild values only)
 4. Adaptive-P: Final selection with probability targeting
 
@@ -46,7 +45,7 @@ Min-P and Adaptive-P serve different, complementary purposes:
 
 | Aspect | Min-P | Adaptive-P |
 |--------|-------|------------|
-| Purpose | Remove garbage | Select among quality |
+| Purpose | Remove incoherent options | Select among quality |
 | Method | Truncation | Preference |
 | Output | Filtered candidates | Single selection |
 
@@ -73,7 +72,7 @@ Users often want "more creative" or "less creative" output. Both temperature and
 - Temperature 1.3: Flattens distribution, increases entropy
 - Target 0.3: Prefers lower-probability tokens directly
 
-The difference is controllability. Temperature affects the whole distribution uniformly. Target specifies exactly which probability range to prefer. For controlled creativity adjustment, target is the more precise tool.
+The difference is controllability. Temperature affects the whole distribution uniformly. Target specifies exactly which probability range to prefer. For controlled creativity adjustment, target is a more precise tool.
 
 **Recommendation:**
 
@@ -82,8 +81,8 @@ Keep temperature at 1.0 (neutral) and use target for creativity control. If temp
 ## 6.4 Interactions with Other Samplers
 
 **Samplers that work well before Adaptive-P:**
-- Min-P: Recommended as complementary guardrail
-- Top-K: Fine for efficiency, but often unnecessary with min-p
+- Min-P: Recommended as a complementary guardrail
+- Top-K: Reduces initial selection pool for efficiency; high values recommended
 - Top-P: Works, but somewhat redundant with Adaptive-P's targeting
 - Temperature: Works if mild
 
@@ -91,7 +90,7 @@ Keep temperature at 1.0 (neutral) and use target for creativity control. If temp
 
 - **DRY / Repetition Penalty:** Adaptive-P breaks repetition chains by design. When high-probability tokens are selected repeatedly, the adaptive mechanism shifts target downward, making alternatives more attractive. In many cases, this reduces or eliminates the need for external repetition penalty.
 
-- **XTC:** Adaptive-P achieves XTC's goal (forced consideration of alternatives) with finer control and without the fat-tail redistribution concern. Users who previously relied on XTC often find they can disable it when using Adaptive-P.
+- **XTC:** Adaptive-P achieves similar goals to XTC (forced consideration of alternatives) with finer control and without the fat-tail redistribution concern. It is unnecessary to use both at the same time.
 
 - **Mirostat:** Both target perplexity/entropy, but through different mechanisms. Additionally, Mirostat also requires being the final sampler in the chain—they cannot coexist. Use one or the other.
 
