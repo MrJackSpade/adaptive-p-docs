@@ -22,13 +22,13 @@ Adaptive-P addresses this by applying a bell-curve transformation centered on th
 
 ## 3.2 Real Distribution Behavior
 
-In practice, candidate pools after min-p filtering show characteristic patterns rather than smooth distributions. Understanding these patterns is essential to understanding why Adaptive-P's specific transformation design matters.
+In practice, candidate pools after Min-P filtering show characteristic patterns rather than smooth distributions. Understanding these patterns is essential to understanding why Adaptive-P's specific transformation design matters.
 
 ### Pattern A: Forced Choice
 
 **Example:** A distribution with a single token at probability 1.0.
 
-When only one token survives min-p filtering, the sampler has no choice. Adaptive-P passes through—the single token is selected regardless of its probability relative to target.
+When only one token survives Min-P filtering, the sampler has no choice. Adaptive-P passes through—the single token is selected regardless of its probability relative to target.
 
 **Implication:** Adaptive-P cannot create choices that don't exist. It operates on the candidates provided by earlier pipeline stages.
 
@@ -38,7 +38,7 @@ When only one token survives min-p filtering, the sampler has no choice. Adaptiv
 
 **Example:** Two candidates—one at 0.94, one at 0.06.
 
-Two candidates with a large probability gap. Both are viable (passed min-p), but one strongly dominates.
+Two candidates with a large probability gap. Both are viable (passed Min-P), but one strongly dominates.
 
 **Effect:** If target is 0.5, neither token is close. The 0.94 token is 0.44 away from target; the 0.06 token is also 0.44 away. Because they're nearly equidistant from target, the transformation produces nearly equal output probabilities—despite starting with a 94% vs 6% split. The underdog's post-transform probability rises to roughly 50%.
 
@@ -52,7 +52,7 @@ One mid-range leader with a cluster of low-probability alternatives. This is whe
 
 **The clustering problem:** If transformation applies a floor (e.g., minimum logit of 0), all 20 tail tokens hit that floor after softmax. Each gets exp(0) = 1.0 relative score. Twenty tokens times 1.0 = 20.0 cumulative score. The leader at 0.30 might have logit 5.0, so exp(5.0) ≈ 148. Ratio: 148 / (148 + 20) ≈ 88% for leader, 12% for entire tail.
 
-That 12% split across 20 tokens seems okay, but imagine 100 tail tokens: now it's 148 / (148 + 100) ≈ 60% leader, 40% tail—significant garbage probability.
+That 12% split across 20 tokens seems okay, but imagine 100 tail tokens: now it's 148 / (148 + 100) ≈ 60% leader, 40% tail—significant probability.
 
 **Adaptive-P's solution:** Unbounded negative logits. Each additional unit of distance from target produces another unit of negative logit, which translates to another order of magnitude less probability after softmax. The cluster never accumulates mass.
 
@@ -231,3 +231,4 @@ This primes the history as if infinitely many tokens at the target probability h
 <td width="50%"><strong>Correct initialization:</strong><br><img src="../charts/target_d0.9.png" width="100%"><br><em>Correct init: Target stable from first token.</em></td>
 </tr>
 </table>
+
