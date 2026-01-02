@@ -113,8 +113,8 @@ These values were tuned visually against sample candidate pool distributions—c
 Width normalizes the distance metric, defining what "near" and "far" mean in probability space.
 
 With `WIDTH = 0.3`:
-- A token 0.2 probability units from target has `dist = 1.0` (one "standard width")
-- A token 0.4 probability units from target has `dist = 2.0`
+- A token 0.3 probability units from target has `dist = 1.0` (one "standard width")
+- A token 0.6 probability units from target has `dist = 2.0`
 
 This scaling produces intuitive relationships between target values and selection behavior. A target of 0.5 creates a preference band roughly spanning 0.3–0.7, with tokens outside this range progressively suppressed.
 
