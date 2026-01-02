@@ -108,11 +108,11 @@ Sharpness interacts with the decay parameter: higher sharpness amplifies the eff
 
 These values were tuned visually against sample candidate pool distributions—calibrated to produce reasonable drift among top candidates while preventing probability pile-up in the tail. They perform well across tested models but could likely be improved through systematic optimization.
 
-### DISTRIBUTION_WIDTH = 0.2 (INV_WIDTH = 5.0)
+### DISTRIBUTION_WIDTH = 0.3 (INV_WIDTH = 5.0)
 
 Width normalizes the distance metric, defining what "near" and "far" mean in probability space.
 
-With `WIDTH = 0.2`:
+With `WIDTH = 0.3`:
 - A token 0.2 probability units from target has `dist = 1.0` (one "standard width")
 - A token 0.4 probability units from target has `dist = 2.0`
 
