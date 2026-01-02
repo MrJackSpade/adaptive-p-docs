@@ -104,7 +104,7 @@ When XTC removes top tokens, the probability mass must go somewhere. Standard im
 
 This causes **fat tail accumulation**: removing a 0.6 probability token and redistributing to 1000 remaining tokens gives each an extra 0.0006. But those 1000 tail tokens, collectively, now have significant mass. The probability of selecting a low-quality token increases substantially.
 
-This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the incoherent tail.
+This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. However, more exclusion means more probability mass is dumped into the incoherent tail, leading to wildly inconsistent results.
 
 **Practical Issues:**
 
@@ -171,4 +171,5 @@ When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With renor
 This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get either incoherent or coherent alternatives. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
 
 The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC's renormalization boosts all tail tokens proportionally, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.
+
 
