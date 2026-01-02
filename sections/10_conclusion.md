@@ -16,9 +16,9 @@ Adaptive-P applies a distance-based transformation that preferentially selects t
 - Adaptive adjustment to maintain target average over time
 
 **Key properties:**
-1. **Direct targeting:** Users specify the desired probability range, not an abstract "temperature" value
+1. **Direct targeting:** Users specify their desired probability range, not an abstract "temperature" value
 2. **Chain breaking:** Consecutive high-confidence selections trigger adaptive compensation, making alternatives more attractive
-3. **No fat tails:** Unlike XTC-style redistribution, probability concentrates on near-target tokens rather than spreading to garbage
+3. **No fat tails:** Unlike XTC-style redistribution, probability concentrates on near-target tokens rather than spreading to undesirable options
 
 
 ## 9.2 Contributions
@@ -29,7 +29,7 @@ This work offers the following:
 
 2. **Algorithm:** The specific transformation design—unbounded quadratic with adaptive history—that makes probability targeting work on real token distributions with their sparse, clustered characteristics.
 
-3. **Integration:** Clear guidance on sampler chain positioning and interaction with existing methods, particularly the complementary relationship with min-p.
+3. **Integration:** Clear guidance on sampler chain positioning and interaction with existing methods, particularly the complementary relationship with Min-P.
 
 4. **Validation:** Empirical demonstration that Adaptive-P achieves its targeting goal across varied models and prompts.
 
@@ -39,7 +39,7 @@ This work offers the following:
 
 **Sharp distributions limit effectiveness.** Heavily instruction-tuned models with peaked distributions show less dramatic effects from Adaptive-P compared to base models with spread distributions.
 
-**Parameter tuning still required.** While "target" is more intuitive than "temperature," users must still learn what probability range produces their desired output quality. The default (0.5) works well for many cases but isn't universal.
+**Parameter tuning is still required.** While "target" is more intuitive than "temperature," users must still learn what probability range produces their desired output quality. The default (0.5) works well for many cases but isn't universal.
 
 ## 9.4 Future Work
 
@@ -61,10 +61,10 @@ Adaptive-P is implemented in llama.cpp and available via PR to the main reposito
 
 This work wouldn't exist without the following contributors from the BeaverAI community for their invaluable assistance:
 
-- **mfunlimited** — Created and maintained the llama.cpp mainline PR (#17927), ported the C# implementation to C++, iterated through multiple algorithm versions, and coordinated with upstream maintainers
-- **concedo** — Identified the long tail issue with the original Lorentzian formula, collaborated on deriving the correct initialization formula (`target / (1 - decay)`), validated mathematical correctness, and implemented the sampler in KoboldCpp
-- **aessedai** — Created and maintained the SillyTavern fork with sampler support, hosted test APIs for community testing, and created Docker images for RunPod deployment
-- **geechan** — Community coordination, documentation planning, opened the ik_llama feature request, and organized testing efforts across models
+- **[mfunlimited](https://github.com/ddh0)** — Created and maintained the llama.cpp mainline PR (#17927), ported the C# implementation to C++, iterated through multiple algorithm versions, and coordinated with upstream maintainers
+- **[concedo](https://github.com/LostRuins)** — Identified the long tail issue with the original Lorentzian formula, collaborated on deriving the correct initialization formula (`target / (1 - decay)`), validated mathematical correctness, and implemented the sampler in KoboldCpp
+- **[AesSedai](https://github.com/AesSedai)** — Created and maintained the SillyTavern fork with sampler support, hosted test APIs for community testing, and created Docker images for RunPod deployment
+- **[Geechan](https://github.com/Geechan)** — Community coordination, documentation planning, opened the ik_llama feature request, and organized testing efforts across models
 
 Special thanks to the broader llama.cpp community for their continued development of accessible LLM inference tooling.
 
