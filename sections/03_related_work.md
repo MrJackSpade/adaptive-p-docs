@@ -67,27 +67,27 @@ threshold = max_probability * min_p
 **Properties:**
 - Scales with distribution shape: peaked distributions have higher absolute thresholds
 - Effective garbage removal: tokens far below the leader are excluded
-- Commonly used values: min_p = 0.05 to 0.1
+- Commonly used values: Min_P = 0.05 to 0.1
 
 **Strengths:**
 
-Min-P is excellent at what it does: removing tokens that should never be selected regardless of other sampling decisions. It prevents the pathological case where temperature increase allows garbage tokens to accumulate probability.
+Min-P is excellent at what it does: removing tokens that should never be selected regardless of other sampling decisions. It prevents the pathological case where temperature increase allows undesirable tokens to accumulate probability.
 
 **Relationship to Adaptive-P:**
 
 Min-P and Adaptive-P are complementary. Min-P serves as a guardrail that cleans the candidate pool. Adaptive-P then operates on the remaining quality candidates, applying preference among them.
 
-The samples in this paper show tokens already filtered to p > 0.01—that's min-p at work. Adaptive-P assumes this cleanup has happened and focuses on the selection decision among viable candidates.
+The samples in this paper show tokens already filtered to p > 0.01—that's Min-P at work. Adaptive-P assumes this cleanup has happened and focuses on the selection decision among viable candidates.
 
 ### Min-P as Guardrail: Text Comparison
 
-The stabilizing effect of min-p on low-target generations is best demonstrated through reading. With target 0.1 (maximum creativity), Adaptive-P aggressively prefers the lowest-probability tokens. Without min-p, garbage tokens become valid selections. With min-p, only quality candidates remain.
+The stabilizing effect of min-p on low-target generations is best demonstrated through reading. With target 0.1 (maximum creativity), Adaptive-P aggressively prefers the lowest-probability tokens. Without Min-P, undesirable tokens become valid selections. With Min-P, only quality candidates remain.
 
 **Prompt:** *"Write me a three paragraph horror story about a haunted bath-house written in the first person"*
 
-**[Target 0.1 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as garbage tokens are selected
+**[Target 0.1 WITHOUT Min-P](../samples/target_0_no_minp.md)** — Chaotic, incoherent output as undesirable low P tokens are selected
 
-**[Target 0.1 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; min-p removes garbage while Adaptive-P explores low-probability quality tokens
+**[Target 0.1 WITH Min-P 0.05](../samples/target_0_with_minp.md)** — Coherent but highly creative output; Min-P removes incoherent options while Adaptive-P explores remaining quality low-probability tokens
 
 ## 2.5 XTC (eXclude Top Choices)
 
@@ -100,17 +100,17 @@ XTC randomly removes high-probability tokens to force consideration of alternati
 
 **Observed Limitation: Renormalization**
 
-When XTC removes top tokens, the probability mass must go somewhere. Standard implementations renormalize across all remaining tokens—including garbage tokens at the far tail.
+When XTC removes top tokens, the probability mass must go somewhere. Standard implementations renormalize across all remaining tokens—including undesirable tokens at the far tail.
 
 This causes **fat tail accumulation**: removing a 0.6 probability token and redistributing to 1000 remaining tokens gives each an extra 0.0006. But those 1000 tail tokens, collectively, now have significant mass. The probability of selecting a low-quality token increases substantially.
 
-This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the garbage tail.
+This problem can compound when XTC users typically increase the exclusion probability to get "more creative" output. But more exclusion means more probability mass dumped into the incoherent tail.
 
 **Practical Issues:**
 
-XTC can produce unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—garbage tokens were selected due to accumulated tail probability.
+XTC can produce unpredictable results. Some generations are excellent—the forced alternative selection leads to interesting choices. Others are incoherent—undesirable tokens were selected due to accumulated tail probability.
 
-The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs. Some users describe "never knowing what you were going to get."
+The RNG dependence also means that the same prompt with the same settings can produce wildly different quality outputs.
 
 <table>
 <tr>
@@ -153,7 +153,7 @@ This is fundamentally different from:
 
 **Handling Real Distributions:**
 
-Real token distributions after min-p rarely resemble smooth curves. They typically show:
+Real token distributions after Min-P rarely resemble smooth curves. They typically show:
 - A single 100% token (forced choice—no alternatives exist)
 - One high token + sparse low cluster (one clear option, some distant alternatives)
 - 2-3 mid-range candidates + low cluster with gap (competitive choice with tail)
@@ -161,13 +161,14 @@ Real token distributions after min-p rarely resemble smooth curves. They typical
 
 Adaptive-P's transformation handles each case appropriately. The unbounded negative logits prevent clustered low tokens from accumulating probability. The quadratic core provides fine differentiation among close competitors.
 
-**Why renormalization fails (the XTC problem):**
+**The problem with renormalization (XTC):**
 
 When XTC removes a 0.6 probability token, that 0.6 must go somewhere. With renormalization across 100 remaining tokens:
 - Each gets +0.006 added probability
-- A garbage token that was 0.001 becomes 0.007—a 7× increase
-- The combined tail of 90 garbage tokens goes from ~0.05 total to ~0.60 total
+- An incoherent token that was 0.001 becomes 0.007—a 7× increase
+- The combined tail of 90 incoherent tokens goes from ~0.05 total to ~0.60 total
 
-This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get garbage as to get a coherent alternative. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
+This "fat tail" effect means that after XTC removes the top choice, you're nearly as likely to get either incoherent or coherent alternatives. Users experience this as generation "flip-flopping" between reasonable output and nonsense—never knowing which they'll get.
 
 The XTC vs. Adaptive-P comparison charts in Section 2.5 demonstrate this contrast: XTC's renormalization boosts all tail tokens proportionally, while Adaptive-P concentrates probability on near-target tokens and suppresses the tail.
+
