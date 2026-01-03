@@ -34,7 +34,7 @@ Chain positioning (must be last), Min-P complementarity, temperature interaction
 Selection distribution analysis, target achievement, comparisons with temperature, adaptation dynamics, initialization validation, cross-model consistency.
 
 ### [8. Reference Implementation](sections/09_implementation.md)
-Annotated C++ implementation, Python pseudocode, data structures, and porting notes.
+Annotated C++ implementation.
 
 ### [9. Conclusion](sections/10_conclusion.md)
 Summary of contributions, limitations, and future work directions.
