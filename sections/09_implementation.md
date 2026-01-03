@@ -94,7 +94,7 @@ struct llama_sampler * llama_sampler_init_adaptive_p(
 
 ## 8.4. Adaptive probability transformation constants
 
-These constants control the shape of the logit transformation function. `DISTRIBUTION_WIDTH` defines how wide the "favored" probability region is around the target — probabilities within ±0.3 of the target receive relatively high logits. `PEAK_LOGIT_VALUE` sets the maximum logit assigned to tokens exactly at the target probability. `SHARPNESS` controls how steeply logits fall off as distance from the target increases. These values were empirically tuned; see section 4 (Design Justification) for details on why they aren't user-configurable.
+These constants control the shape of the logit transformation function. `DISTRIBUTION_WIDTH` defines how wide the "favored" probability region is around the target — probabilities within ±0.3 of the target receive relatively high logits. `PEAK_LOGIT_VALUE` sets the maximum logit assigned to tokens exactly at the target probability. `SHARPNESS` controls how steeply logits fall off as distance from the target increases. These values were empirically tuned; see [*Design Justification*](https://github.com/MrJackSpade/adaptive-p-docs/blob/main/sections/05_design_justification.md) for details on why they aren't user-configurable.
 
 ```cpp
 static constexpr float DISTRIBUTION_WIDTH =  0.3f;
@@ -107,7 +107,72 @@ static constexpr float INV_WIDTH          =  1.0f / DISTRIBUTION_WIDTH;
 
 The apply function is called once per sampling step. When the target is negative, the sampler acts as a pass-through — it just samples from the existing distribution without any transformation. This allows adaptive-p to be disabled at runtime without removing it from the sampler chain.
 
-For normal operation, the algorithm proceeds in four phases. First, it applies softmax to get probabilities and caches them before any transformation. Second, it computes an *adapted* target using the formula `2 * target - EMA`: if the running average is above target, the adapted target drops below target to compensate, creating a self-correcting feedback loop. Third, it transforms the cached probabilities into new logits using a function that peaks at the adapted target and falls off with distance — quadratic near the target for fine differentiation, transitioning to linear in the tails to ensure proper suppression after the subsequent softmax. Finally, it samples from the transformed distribution and updates the EMA using the *original* (pre-transformation) probability of the selected token.
+The algorithm consists of the following steps:
+
+#### 8.5.0: Escape hatch
+If the user-configurable `target` parameter is set below 0.0, we do not apply the probability transform at all. We just sample from the existing distribution.
+
+```cpp
+if (ctx->target < 0.0f) {
+    llama_sampler_softmax_impl(cur_p, false);
+    cur_p->selected = llama_sample_dist(cur_p, ctx->rng);
+    return;
+}
+```
+
+#### 8.5.1: Softmax and store the original probabilities
+Apply softmax to get the current probabilities and caches them before any transformation.
+
+```cpp
+    llama_sampler_softmax_impl(cur_p, false);
+    ctx->original_probs.resize(cur_p->size);
+    for (size_t i = 0; i < cur_p->size; ++i) {
+        ctx->original_probs[i] = cur_p->data[i].p;
+    }
+```
+
+#### 8.5.2: Compute adapted target probability
+Compute the *adapted* target using the formula `2 * target - EMA`: if the running average is above target, the adapted target drops below target to compensate, creating a self-correcting feedback loop.
+
+```cpp
+    auto target = std::clamp(ctx->target, 0.0f, 1.0f);
+    float adapted_target = std::clamp(
+        ctx->total_weight == 0.0f ? target : 2.0f * target - (ctx->weighted_sum / ctx->total_weight),
+        0.0f, 1.0f
+    );
+```
+
+#### 8.5.3: Adaptive probability transform
+Transform the cached probabilities into new logits using a function that peaks at the adapted target and falls off with distance — quadratic near the target for fine differentiation, transitioning to linear in the tails to ensure proper suppression after the subsequent softmax.
+
+```cpp
+    for (size_t i = 0; i < cur_p->size; ++i) {
+        float dist = std::abs((cur_p->data[i].p - adapted_target) * INV_WIDTH);
+        cur_p->data[i].logit = PEAK_LOGIT_VALUE - SHARPNESS * dist * dist / (1.0f + dist);
+    }
+```
+
+#### 8.5.4: Softmax and sample from the transformed distribution
+
+```cpp
+    llama_sampler_softmax_impl(cur_p, false);
+    const int idx   = llama_sample_dist(cur_p, ctx->rng);
+    cur_p->selected = idx;
+```
+
+#### 8.5.5: Update the EMA state
+After sampler, update the EMA state with the the *original* (pre-transformation) probability of the selected token
+
+```cpp
+    // update EMA with the original probability of the selected token
+    ctx->weighted_sum = ctx->original_probs[idx] + ctx->decay * ctx->weighted_sum;
+    ctx->total_weight = 1.0f + ctx->decay * ctx->total_weight;
+```
+
+### Full implementation
+
+<details>
+<summary>Click to expand</summary>
 
 ```cpp
 static void llama_sampler_adaptive_p_apply(struct llama_sampler * smpl, llama_token_data_array * cur_p) {
@@ -156,6 +221,8 @@ static void llama_sampler_adaptive_p_apply(struct llama_sampler * smpl, llama_to
     ctx->total_weight = 1.0f + ctx->decay * ctx->total_weight;
 }
 ```
+
+</details>
 
 ## 8.6. Sampler state reset
 
