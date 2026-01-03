@@ -25,7 +25,7 @@ Core probability targeting, real distribution patterns (forced choice, binary sp
 Why the logit transformation function was selected, empirical tuning of constants, and design tradeoffs.
 
 ### [5. Parameters](sections/06_parameters.md)
-`target` (0.0–1.0), `decay` (0.0–0.99), internal constants. Includes elasticity/stubbornness/fishtailing behavior and why SHARPNESS isn't user-configurable.
+`target` (0.0-1.0), `decay` (0.0-0.99), internal constants. Includes elasticity/stubbornness/fishtailing behavior and why SHARPNESS isn't user-configurable.
 
 ### [6. Integration](sections/07_integration.md)
 Chain positioning (must be last), Min-P complementarity, temperature interaction, samplers made unnecessary. Includes llama.cpp usage examples.

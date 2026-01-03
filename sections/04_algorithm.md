@@ -113,7 +113,7 @@ Breaking this down:
 
 1. **Distance calculation:** `|probability - target| × INV_WIDTH`
    - Absolute distance from target, scaled by inverse distribution width
-   - INV_WIDTH (1/0.2 = 5.0) amplifies distance for sharper discrimination
+   - INV_WIDTH (1/0.3 = 3.333) amplifies distance for sharper discrimination
 
 2. **Transformation:** `PEAK − SHARPNESS × dist² / (1 + dist)`
    - PEAK_LOGIT_VALUE (5.0): Maximum logit for tokens exactly at target
@@ -124,9 +124,9 @@ Breaking this down:
 
 The `dist² / (1 + dist)` function has critical properties:
 
-- **Near target (dist → 0):** Behaves like `dist²` (quadratic). Small differences in distance produce proportionally small differences in logit. This allows fine discrimination among close competitors.
+- **Near target (dist -> 0):** Behaves like `dist²` (quadratic). Small differences in distance produce proportionally small differences in logit. This allows fine discrimination among close competitors.
 
-- **Far from target (dist → ∞):** Behaves like `dist` (linear). Each additional unit of distance subtracts another unit from the logit. This is the "unbounded negative" property that prevents tail accumulation.
+- **Far from target (dist -> ∞):** Behaves like `dist` (linear). Each additional unit of distance subtracts another unit from the logit. This is the "unbounded negative" property that prevents tail accumulation.
 
 - **Transition region:** Smooth interpolation between behaviors. No discontinuities or kinks.
 
@@ -145,7 +145,7 @@ This section addresses the clustering problem in detail, as it's the key insight
 **With a logit floor (bounded transformation):**
 - All 26 tokens are far from target
 - All receive approximately the minimum logit (let's say 0.0)
-- After softmax: each gets exp(0) = 1.0 relative weight
+- After softmax: each gets $e^0$ = 1.0 relative weight
 - Total weight: 26.0
 - Each token probability: 1/26 ≈ 3.8%
 
@@ -153,7 +153,7 @@ This section addresses the clustering problem in detail, as it's the key insight
 - Closest token (0.11 probability) gets logit ≈ 3.0
 - Next closest gets logit ≈ 2.5
 - Distant tokens get logits of -5, -10, -15...
-- After softmax: exp(3.0) ≈ 20, exp(2.5) ≈ 12, exp(-10) ≈ 0.00005
+- After softmax: $e^3.0$ ≈ 20, $e^2.5$ ≈ 12, $e^-10$ ≈ 0.00005
 - Distant tokens contribute essentially zero probability
 
 The practical difference:
@@ -168,23 +168,19 @@ The XTC comparison charts in Section 2.5 illustrate this directly: XTC's renorma
 
 The transformation outputs raw logit values. Softmax converts these to probabilities:
 
-```
-probability[i] = exp(logit[i]) / Σ exp(logit[j])
-```
+$$\text{probability}[i] = \frac{\exp(\text{logit}[i])}{\sum_j \exp(\text{logit}[j])}$$
 
 **Key property:** Relative differences between logits matter, not absolute values. Adding a constant C to all logits doesn't change probabilities:
 
-```
-exp(logit + C) / Σ exp(logit_j + C)  =  exp(C) × exp(logit) / (exp(C) × Σ exp(logit_j))  =  exp(logit) / Σ exp(logit_j)
-```
+$$\frac{\exp(\text{logit} + C)}{\sum_j \exp(\text{logit}_j + C)} = \frac{e^C \cdot \exp(\text{logit})}{e^C \cdot \sum_j \exp(\text{logit}_j)} = \frac{\exp(\text{logit})}{\sum_j \exp(\text{logit}_j)}$$
 
-The exp(C) terms cancel out.
+The $e^C$ terms cancel out.
 
 This means PEAK_LOGIT_VALUE (5.0) is somewhat arbitrary—what matters is the *difference* between peak and suppressed logits.
 
 **Interaction with tail behavior:**
 
-Softmax's exponential nature amplifies the unbounded negative property. A logit difference of 10 produces a probability ratio of exp(10) ≈ 22,000. Very distant tokens become negligible contributors even without explicit removal.
+Softmax's exponential nature amplifies the unbounded negative property. A logit difference of 10 produces a probability ratio of $e^10$ ≈ 22,000. Very distant tokens become negligible contributors even without explicit removal.
 
 ![Pre vs post softmax comparison showing logits and probabilities](../charts/g12_softmax.png)
 
@@ -197,15 +193,15 @@ Adaptive-P maintains two state variables across token selections:
 
 Updated after each selection:
 ```cpp
-weighted_sum = original_probs[selected_idx] + decay × weighted_sum
-total_weight = 1.0 + decay × total_weight
+weighted_sum = original_probs[selected_idx] + decay * weighted_sum
+total_weight = 1.0 + decay * total_weight
 ```
 
 **The initialization problem:**
 
 If weighted_sum and total_weight start at 0, the first calculated target becomes:
 ```
-calculated_target = 2.0 × target − (0 / 0)  // undefined!
+calculated_target = 2.0 * target − (0 / 0)  // undefined!
 ```
 
 The code handles the 0/0 case by using the configured target directly. But this creates a transient: early selections have no history to compensate, so the sampler behaves differently during warmup.
@@ -221,7 +217,7 @@ total_weight = 1.0 / (1.0 - decay)
 For target=0.5, decay=0.9:
 - weighted_sum = 0.5 / 0.1 = 5.0
 - total_weight = 1.0 / 0.1 = 10.0
-- weighted_average = 5.0 / 10.0 = 0.5 ✓
+- weighted_average = 5.0 / 10.0 = 0.5
 
 This primes the history as if infinitely many tokens at the target probability had been selected, providing stable behavior from the first token.
 
